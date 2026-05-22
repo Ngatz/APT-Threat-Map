@@ -1,0 +1,399 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+
+.header { padding: 1.5rem 1.5rem 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.header h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.header p { font-size: 13px; color: var(--color-text-secondary); }
+
+.tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0 1.5rem; }
+.tab { padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--color-text-secondary); transition: all .15s; white-space: nowrap; }
+.tab.active { border-bottom-color: currentColor; }
+.tab.china { color: #185FA5; }
+.tab.china.active { border-bottom-color: #185FA5; }
+.tab.nk { color: #3B6D11; }
+.tab.nk.active { border-bottom-color: #3B6D11; }
+.tab.china2 { color: #854F0B; }
+.tab.china2.active { border-bottom-color: #854F0B; }
+
+.panel { display: none; padding: 1.25rem 1.5rem 1.5rem; }
+.panel.active { display: block; }
+
+.actor-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem; }
+.actor-badge { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.actor-meta h3 { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.actor-meta .aliases { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.actor-meta .attribution { font-size: 12px; margin-top: 4px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+.stat-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+.stat-val { font-size: 17px; font-weight: 500; color: var(--color-text-primary); }
+
+.section-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .05em; margin: 1rem 0 8px; }
+
+.kill-chain { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+.kc-step { display: flex; flex-direction: column; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; flex: 1; min-width: 100px; border: 0.5px solid var(--color-border-tertiary); position: relative; }
+.kc-tactic { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 4px; }
+.kc-tech { font-size: 12px; color: var(--color-text-primary); line-height: 1.4; }
+.kc-id { font-size: 10px; color: var(--color-text-tertiary); margin-top: 4px; font-family: var(--font-mono); }
+.kc-accent { width: 3px; position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px 0 0 8px; }
+
+.tools-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+.tool-pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 0.5px solid; font-family: var(--font-mono); }
+
+.cve-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+.cve-pill { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-family: var(--font-mono); font-weight: 500; }
+
+.ref-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); padding: 5px 0; border-top: 0.5px solid var(--color-border-tertiary); }
+.ref-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.compare-section { padding: 0 1.5rem 1.5rem; }
+.compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.compare-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 14px; }
+.compare-card h4 { font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
+.compare-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+.compare-row span:first-child { color: var(--color-text-secondary); }
+.compare-row span:last-child { font-weight: 500; color: var(--color-text-primary); }
+
+.mitre-badge { display: inline-block; font-size: 10px; font-family: var(--font-mono); padding: 2px 6px; border-radius: 3px; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); }
+
+.toggle-compare { font-size: 12px; color: var(--color-text-secondary); text-align: center; padding: 6px 0 1rem; cursor: pointer; }
+.toggle-compare:hover { color: var(--color-text-primary); }
+</style>
+
+<h2 class="sr-only">APT Threat Map: Salt Typhoon, Lazarus Group, and Mustang Panda — MITRE ATT&CK-mapped profiles</h2>
+
+<div class="header">
+  <h2>APT threat intelligence map</h2>
+  <p>Salt Typhoon · Lazarus Group · Mustang Panda — sourced from MITRE ATT&CK, CISA, Kaspersky, CrowdStrike</p>
+</div>
+
+<div class="tabs">
+  <div class="tab china active" onclick="showPanel('salt')">🌊 Salt Typhoon</div>
+  <div class="tab nk" onclick="showPanel('laz')">☢️ Lazarus Group</div>
+  <div class="tab china2" onclick="showPanel('mp')">🐼 Mustang Panda</div>
+</div>
+
+<!-- SALT TYPHOON -->
+<div class="panel active" id="panel-salt">
+  <div class="actor-header">
+    <div class="actor-badge" style="background:#E6F1FB;">🌊</div>
+    <div class="actor-meta">
+      <h3>Salt Typhoon</h3>
+      <div class="aliases">Also known as: GhostEmperor · FamousSparrow · Earth Estries · UNC2286 · G1045</div>
+      <div class="attribution" style="color:#185FA5;">🇨🇳 PRC Ministry of State Security — active since ≥ 2019</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Primary target</div><div class="stat-val" style="font-size:13px;margin-top:2px">ISPs / Telecoms</div></div>
+    <div class="stat-card"><div class="stat-label">Orgs breached</div><div class="stat-val">200+</div></div>
+    <div class="stat-card"><div class="stat-label">Countries hit</div><div class="stat-val">80+</div></div>
+  </div>
+
+  <div class="section-title">MITRE ATT&CK kill chain</div>
+  <div class="kill-chain">
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#185FA5"></div>
+      <div class="kc-tactic">Initial Access</div>
+      <div class="kc-tech">Exploit public-facing apps (VPN/firewall/Exchange)</div>
+      <div class="kc-id">T1190</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#185FA5"></div>
+      <div class="kc-tactic">Persistence</div>
+      <div class="kc-tech">SSH authorized_keys on routers; scheduled tasks</div>
+      <div class="kc-id">T1098 · T1053</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#185FA5"></div>
+      <div class="kc-tactic">Lateral Movement</div>
+      <div class="kc-tech">Valid accounts (local); living-off-the-land binaries</div>
+      <div class="kc-id">T1078.003</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#185FA5"></div>
+      <div class="kc-tactic">Credential Access</div>
+      <div class="kc-tech">LSASS memory dumping</div>
+      <div class="kc-id">T1003.001</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#185FA5"></div>
+      <div class="kc-tactic">Collection</div>
+      <div class="kc-tech">Intercept subscriber comms; lawful-intercept system access</div>
+      <div class="kc-id">T1557 · T1119</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#185FA5"></div>
+      <div class="kc-tactic">Exfiltration</div>
+      <div class="kc-tech">GhostSpider backdoor C2 over encrypted channels</div>
+      <div class="kc-id">T1041</div>
+    </div>
+  </div>
+
+  <div class="section-title">Key malware &amp; tools</div>
+  <div class="tools-grid">
+    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">GhostSpider</span>
+    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">SparrowDoor</span>
+    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">TrillClient</span>
+    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">Cobalt Strike</span>
+    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">Mimikatz</span>
+    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">Rootkits (memory)</span>
+  </div>
+
+  <div class="section-title">Exploited CVEs</div>
+  <div class="cve-list">
+    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2023-46805</span>
+    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2024-21887 (Ivanti)</span>
+    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2021-26855 (ProxyLogon)</span>
+    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2018-0171 (Cisco)</span>
+    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2024-3400 (PAN-OS)</span>
+  </div>
+
+  <div class="section-title">Notable victims (US ISPs/telecoms)</div>
+  <div class="tools-grid">
+    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">AT&amp;T</span>
+    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Verizon</span>
+    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">T-Mobile</span>
+    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Lumen</span>
+    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Spectrum</span>
+    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Windstream</span>
+  </div>
+
+  <div class="ref-row"><div class="ref-dot" style="background:#185FA5"></div>MITRE ATT&amp;CK G1045 · CISA AA25-239A · Cisco Talos Feb 2025 · Trend Micro (Earth Estries) · Kaspersky (GhostEmperor)</div>
+</div>
+
+<!-- LAZARUS GROUP -->
+<div class="panel" id="panel-laz">
+  <div class="actor-header">
+    <div class="actor-badge" style="background:#EAF3DE;">☢️</div>
+    <div class="actor-meta">
+      <h3>Lazarus Group</h3>
+      <div class="aliases">Also known as: HIDDEN COBRA · Diamond Sleet · ZINC · Labyrinth Chollima · G0032</div>
+      <div class="attribution" style="color:#3B6D11;">🇰🇵 DPRK Reconnaissance General Bureau — active since ≥ 2009</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Primary target</div><div class="stat-val" style="font-size:13px;margin-top:2px">Nuclear / Finance</div></div>
+    <div class="stat-card"><div class="stat-label">Campaign</div><div class="stat-val" style="font-size:13px;margin-top:2px">Operation DreamJob</div></div>
+    <div class="stat-card"><div class="stat-label">Crypto stolen</div><div class="stat-val">$1.5B+</div></div>
+  </div>
+
+  <div class="section-title">MITRE ATT&CK kill chain — nuclear sector focus</div>
+  <div class="kill-chain">
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#3B6D11"></div>
+      <div class="kc-tactic">Initial Access</div>
+      <div class="kc-tech">Spearphishing via fake job lures (LinkedIn/email)</div>
+      <div class="kc-id">T1566.002</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#3B6D11"></div>
+      <div class="kc-tactic">Execution</div>
+      <div class="kc-tech">Malicious trojanized documents; DLL sideloading</div>
+      <div class="kc-id">T1574.002 · T1204</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#3B6D11"></div>
+      <div class="kc-tactic">Defense Evasion</div>
+      <div class="kc-tech">Extended attributes (macOS) to hide code; signed installers</div>
+      <div class="kc-id">T1564 · T1553</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#3B6D11"></div>
+      <div class="kc-tactic">Credential Access</div>
+      <div class="kc-tech">KernelCallbackTable hijack; CVE-2024-38193 (SYSTEM priv)</div>
+      <div class="kc-id">T1055 · T1068</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#3B6D11"></div>
+      <div class="kc-tactic">Command &amp; Control</div>
+      <div class="kc-tech">CookiePlus malware beacon; multi-stage payload droppers</div>
+      <div class="kc-id">T1071 · T1105</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#3B6D11"></div>
+      <div class="kc-tactic">Exfiltration</div>
+      <div class="kc-tech">Data theft + crypto laundering via mixers</div>
+      <div class="kc-id">T1041 · T1657</div>
+    </div>
+  </div>
+
+  <div class="section-title">Key malware &amp; tools</div>
+  <div class="tools-grid">
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">CookiePlus</span>
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">NineRAT</span>
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">DLRAT</span>
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">BottomLoader</span>
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">ThreatNeedle</span>
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">Dacls RAT</span>
+    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">FALLCHILL</span>
+  </div>
+
+  <div class="section-title">Nuclear &amp; critical sector operations</div>
+  <div class="cve-list">
+    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">Operation DreamJob (2024) — nuclear org employees</span>
+    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">Operation Sharpshooter — nuclear/defense/energy</span>
+    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">NPO Mash missile mfr breach</span>
+    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">CVE-2024-38193 (AFD.sys 0-day)</span>
+  </div>
+
+  <div class="section-title">Motivation dual-track</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+    <div style="flex:1;min-width:140px;border:0.5px solid #C0DD97;border-radius:var(--border-radius-md);padding:10px 12px;background:#EAF3DE20">
+      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:4px">🔍 Espionage</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Nuclear/defense intel collection for DPRK regime</div>
+    </div>
+    <div style="flex:1;min-width:140px;border:0.5px solid #C0DD97;border-radius:var(--border-radius-md);padding:10px 12px;background:#EAF3DE20">
+      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:4px">💰 Financial crime</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Crypto heists to fund sanctions-evading weapons program</div>
+    </div>
+  </div>
+
+  <div class="ref-row"><div class="ref-dot" style="background:#3B6D11"></div>MITRE ATT&amp;CK G0032 · Kaspersky (Operation DreamJob Dec 2024) · CYFIRMA Q4 2024 · FBI/DOJ indictments · EuRePoC 2024</div>
+</div>
+
+<!-- MUSTANG PANDA -->
+<div class="panel" id="panel-mp">
+  <div class="actor-header">
+    <div class="actor-badge" style="background:#FAEEDA;">🐼</div>
+    <div class="actor-meta">
+      <h3>Mustang Panda</h3>
+      <div class="aliases">Also known as: BRONZE PRESIDENT · RedDelta · TA416 · Earth Preta · Stately Taurus · G0129</div>
+      <div class="attribution" style="color:#854F0B;">🇨🇳 PRC state-aligned — active since ≥ 2012</div>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Primary target</div><div class="stat-val" style="font-size:13px;margin-top:2px">Governments / NGOs</div></div>
+    <div class="stat-card"><div class="stat-label">Objective</div><div class="stat-val" style="font-size:13px;margin-top:2px">Sensitive data theft</div></div>
+    <div class="stat-card"><div class="stat-label">Regions</div><div class="stat-val" style="font-size:13px;margin-top:2px">SEA · EU · MENA</div></div>
+  </div>
+
+  <div class="section-title">MITRE ATT&CK kill chain</div>
+  <div class="kill-chain">
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#854F0B"></div>
+      <div class="kc-tactic">Initial Access</div>
+      <div class="kc-tech">Spearphishing attachment (.rar/.lnk); USB worm (SnakeDisk)</div>
+      <div class="kc-id">T1566.001 · T1091</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#854F0B"></div>
+      <div class="kc-tactic">Execution</div>
+      <div class="kc-tech">LNK → PowerShell → PlugX dropper chain</div>
+      <div class="kc-id">T1059.001 · T1204</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#854F0B"></div>
+      <div class="kc-tactic">Persistence</div>
+      <div class="kc-tech">Registry Run keys; DLL sideloading (signed binaries)</div>
+      <div class="kc-id">T1547.001 · T1574.002</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#854F0B"></div>
+      <div class="kc-tactic">Defense Evasion</div>
+      <div class="kc-tech">Obfuscated/encrypted payloads; VSCode tunnel C2</div>
+      <div class="kc-id">T1027 · T1572</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#854F0B"></div>
+      <div class="kc-tactic">Credential Access</div>
+      <div class="kc-tech">NTDS.dit theft via vssadmin; CoolClient browser stealer</div>
+      <div class="kc-id">T1003.003 · T1555</div>
+    </div>
+    <div class="kc-step">
+      <div class="kc-accent" style="background:#854F0B"></div>
+      <div class="kc-tactic">Exfiltration</div>
+      <div class="kc-tech">PlugX C2 beacon; cloud services for data exfil</div>
+      <div class="kc-id">T1567 · T1041</div>
+    </div>
+  </div>
+
+  <div class="section-title">Key malware &amp; tools</div>
+  <div class="tools-grid">
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">PlugX</span>
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">CoolClient</span>
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">SnakeDisk (USB worm)</span>
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">LOTUSLITE</span>
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">DOWNBAIT</span>
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">PUBLOAD</span>
+    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">Bookworm</span>
+  </div>
+
+  <div class="section-title">Notable government targets</div>
+  <div class="cve-list">
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Philippines govt</span>
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Myanmar govt</span>
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Slovakia govt</span>
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">EU diplomatic entities</span>
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Vatican</span>
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Thailand military (2025)</span>
+    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">ASEAN-Australia Summit delegates</span>
+  </div>
+
+  <div class="section-title">Lure themes used</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+    <div style="flex:1;min-width:130px;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:10px 12px">
+      <div style="font-size:11px;font-weight:500;color:#854F0B;margin-bottom:3px">Geopolitical docs</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">"EU policy on Russia", conflict zone briefings</div>
+    </div>
+    <div style="flex:1;min-width:130px;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:10px 12px">
+      <div style="font-size:11px;font-weight:500;color:#854F0B;margin-bottom:3px">Govt communications</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Diplomatic cables and policy documents</div>
+    </div>
+    <div style="flex:1;min-width:130px;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:10px 12px">
+      <div style="font-size:11px;font-weight:500;color:#854F0B;margin-bottom:3px">USB delivery (2025)</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Air-gap bridging via SnakeDisk worm</div>
+    </div>
+  </div>
+
+  <div class="ref-row"><div class="ref-dot" style="background:#854F0B"></div>MITRE ATT&amp;CK G0129 · Unit 42 Sept 2024 · Trend Micro (Earth Preta) · IBM X-Force (SnakeDisk) · MITRE ATT&amp;CK Eval 2025</div>
+</div>
+
+<!-- COMPARISON -->
+<div class="compare-section">
+  <div class="section-title" style="padding: 0 0 8px">Side-by-side comparison</div>
+  <div class="compare-grid">
+    <div class="compare-card" style="border-top: 2px solid #185FA5">
+      <h4 style="color:#185FA5">🌊 Salt Typhoon</h4>
+      <div class="compare-row"><span>Nation</span><span>China (MSS)</span></div>
+      <div class="compare-row"><span>Sector</span><span>ISP / Telecoms</span></div>
+      <div class="compare-row"><span>Goal</span><span>Comms intercept</span></div>
+      <div class="compare-row"><span>Entry</span><span>N-day exploits</span></div>
+      <div class="compare-row"><span>Dwell time</span><span>Months–years</span></div>
+      <div class="compare-row"><span>Signature tool</span><span>GhostSpider</span></div>
+    </div>
+    <div class="compare-card" style="border-top: 2px solid #3B6D11">
+      <h4 style="color:#3B6D11">☢️ Lazarus Group</h4>
+      <div class="compare-row"><span>Nation</span><span>N. Korea (RGB)</span></div>
+      <div class="compare-row"><span>Sector</span><span>Nuclear / Crypto</span></div>
+      <div class="compare-row"><span>Goal</span><span>Espionage + theft</span></div>
+      <div class="compare-row"><span>Entry</span><span>Fake job offers</span></div>
+      <div class="compare-row"><span>Dwell time</span><span>Weeks–months</span></div>
+      <div class="compare-row"><span>Signature tool</span><span>CookiePlus</span></div>
+    </div>
+    <div class="compare-card" style="border-top: 2px solid #854F0B">
+      <h4 style="color:#854F0B">🐼 Mustang Panda</h4>
+      <div class="compare-row"><span>Nation</span><span>China (state)</span></div>
+      <div class="compare-row"><span>Sector</span><span>Govt / Diplomatic</span></div>
+      <div class="compare-row"><span>Goal</span><span>Political intel</span></div>
+      <div class="compare-row"><span>Entry</span><span>Spearphish + USB</span></div>
+      <div class="compare-row"><span>Dwell time</span><span>Long-term</span></div>
+      <div class="compare-row"><span>Signature tool</span><span>PlugX / SnakeDisk</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const tabMap = { salt: 0, laz: 1, mp: 2 };
+  document.querySelectorAll('.tab')[tabMap[id]].classList.add('active');
+}
+</script>
