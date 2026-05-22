@@ -1,399 +1,869 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APT Threat Intelligence Map — Salt Typhoon · Lazarus Group · Mustang Panda</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&display=swap');
 
-.header { padding: 1.5rem 1.5rem 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.header h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
-.header p { font-size: 13px; color: var(--color-text-secondary); }
+  :root {
+    --bg-deep: #060b14;
+    --bg-panel: #0b1220;
+    --bg-card: #0f1a2e;
+    --bg-hover: #132035;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.15);
+    --text-primary: #e2e8f0;
+    --text-secondary: #8899aa;
+    --text-dim: #4a5568;
+    --salt: #378ADD;
+    --salt-light: #85B7EB;
+    --salt-dim: rgba(55,138,221,0.15);
+    --laz: #5cb85c;
+    --laz-light: #8dd68d;
+    --laz-dim: rgba(92,184,92,0.15);
+    --mp: #EF9F27;
+    --mp-light: #FAC775;
+    --mp-dim: rgba(239,159,39,0.15);
+    --red: #e24b4a;
+    --font-display: 'Rajdhani', sans-serif;
+    --font-body: 'Exo 2', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
 
-.tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0 1.5rem; }
-.tab { padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--color-text-secondary); transition: all .15s; white-space: nowrap; }
-.tab.active { border-bottom-color: currentColor; }
-.tab.china { color: #185FA5; }
-.tab.china.active { border-bottom-color: #185FA5; }
-.tab.nk { color: #3B6D11; }
-.tab.nk.active { border-bottom-color: #3B6D11; }
-.tab.china2 { color: #854F0B; }
-.tab.china2.active { border-bottom-color: #854F0B; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.panel { display: none; padding: 1.25rem 1.5rem 1.5rem; }
-.panel.active { display: block; }
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-.actor-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem; }
-.actor-badge { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-.actor-meta h3 { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
-.actor-meta .aliases { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
-.actor-meta .attribution { font-size: 12px; margin-top: 4px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
 
-.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
-.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
-.stat-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
-.stat-val { font-size: 17px; font-weight: 500; color: var(--color-text-primary); }
+  /* === TOP BAR === */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6,11,20,0.95);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-logo {
+    width: 28px;
+    height: 28px;
+    background: var(--red);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .topbar-title span { color: var(--red); }
+  .topbar-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 20px;
+  }
+  .topbar-meta .live {
+    color: var(--laz);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .topbar-meta .live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--laz);
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-.section-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .05em; margin: 1rem 0 8px; }
+  /* === LAYOUT === */
+  .shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: auto 1fr;
+    height: calc(100vh - 49px);
+    overflow: hidden;
+  }
 
-.kill-chain { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
-.kc-step { display: flex; flex-direction: column; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; flex: 1; min-width: 100px; border: 0.5px solid var(--color-border-tertiary); position: relative; }
-.kc-tactic { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 4px; }
-.kc-tech { font-size: 12px; color: var(--color-text-primary); line-height: 1.4; }
-.kc-id { font-size: 10px; color: var(--color-text-tertiary); margin-top: 4px; font-family: var(--font-mono); }
-.kc-accent { width: 3px; position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px 0 0 8px; }
+  /* === SIDEBAR === */
+  .sidebar {
+    grid-row: 1 / 3;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
 
-.tools-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
-.tool-pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 0.5px solid; font-family: var(--font-mono); }
+  .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
 
-.cve-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
-.cve-pill { font-size: 11px; padding: 3px 9px; border-radius: 4px; font-family: var(--font-mono); font-weight: 500; }
+  /* APT Selector Buttons */
+  .apt-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .apt-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .apt-btn.salt::before { background: var(--salt); }
+  .apt-btn.laz::before { background: var(--laz); }
+  .apt-btn.mp::before { background: var(--mp); }
+  .apt-btn:hover, .apt-btn.active {
+    background: var(--bg-hover);
+    border-color: var(--border-bright);
+  }
+  .apt-btn.active.salt { border-color: var(--salt); box-shadow: 0 0 0 1px rgba(55,138,221,0.3); }
+  .apt-btn.active.laz  { border-color: var(--laz); box-shadow: 0 0 0 1px rgba(92,184,92,0.3); }
+  .apt-btn.active.mp   { border-color: var(--mp); box-shadow: 0 0 0 1px rgba(239,159,39,0.3); }
 
-.ref-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); padding: 5px 0; border-top: 0.5px solid var(--color-border-tertiary); }
-.ref-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .apt-icon { font-size: 18px; }
+  .apt-btn-info { flex: 1; text-align: left; }
+  .apt-btn-name { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .apt-btn-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 1px; }
 
-.compare-section { padding: 0 1.5rem 1.5rem; }
-.compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.compare-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 14px; }
-.compare-card h4 { font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
-.compare-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
-.compare-row span:first-child { color: var(--color-text-secondary); }
-.compare-row span:last-child { font-weight: 500; color: var(--color-text-primary); }
+  /* Stat block */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+  }
+  .stat-val { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+  .stat-val.salt { color: var(--salt); }
+  .stat-val.laz  { color: var(--laz); }
+  .stat-val.mp   { color: var(--mp); }
+  .stat-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 2px; }
 
-.mitre-badge { display: inline-block; font-size: 10px; font-family: var(--font-mono); padding: 2px 6px; border-radius: 3px; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); }
+  /* === MAP AREA === */
+  .map-area {
+    position: relative;
+    overflow: hidden;
+    background: #060e1c;
+  }
+  #globe { width: 100%; height: 100%; }
 
-.toggle-compare { font-size: 12px; color: var(--color-text-secondary); text-align: center; padding: 6px 0 1rem; cursor: pointer; }
-.toggle-compare:hover { color: var(--color-text-primary); }
+  .map-overlay-tl {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .map-overlay-tr {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  .legend-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(6,11,20,0.75);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .legend-chip:hover { border-color: var(--border-bright); }
+  .legend-chip.active.salt { border-color: var(--salt); color: var(--salt-light); }
+  .legend-chip.active.laz  { border-color: var(--laz); color: var(--laz-light); }
+  .legend-chip.active.mp   { border-color: var(--mp); color: var(--mp-light); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* === DETAIL PANEL === */
+  .detail-panel {
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    overflow-y: auto;
+    max-height: 340px;
+    padding: 16px 20px;
+  }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .detail-panel.hidden { display: none; }
+
+  .dp-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dp-icon { font-size: 28px; }
+  .dp-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+  .dp-name.salt { color: var(--salt); }
+  .dp-name.laz  { color: var(--laz); }
+  .dp-name.mp   { color: var(--mp); }
+  .dp-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+  .dp-mitre {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .dp-mitre span { display: block; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+  .dp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .dp-col-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* TTP cards */
+  .ttp-list { display: flex; flex-direction: column; gap: 6px; }
+  .ttp-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .ttp-num {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    min-width: 58px;
+    margin-top: 2px;
+  }
+  .ttp-right { flex: 1; }
+  .ttp-tactic { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-bottom: 2px; }
+  .ttp-tech { font-family: var(--font-body); font-size: 12px; color: var(--text-primary); }
+
+  /* Pills */
+  .pill-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .pill.salt { background: rgba(55,138,221,0.1); border-color: rgba(55,138,221,0.4); color: var(--salt-light); }
+  .pill.laz  { background: rgba(92,184,92,0.1); border-color: rgba(92,184,92,0.4); color: var(--laz-light); }
+  .pill.mp   { background: rgba(239,159,39,0.1); border-color: rgba(239,159,39,0.4); color: var(--mp-light); }
+  .pill.neutral { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text-secondary); }
+
+  .victim-pill {
+    font-family: var(--font-body);
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+
+  /* Threat timeline bar */
+  .threat-bar { margin: 10px 0; }
+  .threat-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .threat-bar-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); width: 80px; flex-shrink: 0; }
+  .threat-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-card);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .threat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .threat-bar-val { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); width: 30px; text-align: right; }
+
+  /* Pulse animation for map */
+  @keyframes pulse-ring { 0%{r:6;opacity:0.8} 70%{r:16;opacity:0} 100%{r:16;opacity:0} }
+  @keyframes dash-flow { to{stroke-dashoffset:-20} }
+
+  .atk-arc { stroke-dasharray: 6 4; animation: dash-flow 1.8s linear infinite; }
+  .origin-pulse { animation: pulse-ring 2.2s ease-out infinite; }
+
+  /* Responsive */
+  @media(max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { grid-row: auto; max-height: 300px; }
+  }
+
+  /* Tooltip */
+  #tooltip {
+    position: absolute;
+    background: rgba(6,11,20,0.92);
+    border: 1px solid var(--border-bright);
+    border-radius: 5px;
+    padding: 7px 11px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-primary);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 50;
+    max-width: 200px;
+    line-height: 1.5;
+  }
+  #tooltip.show { opacity: 1; }
+
+  /* Footer refs */
+  .refs-bar {
+    grid-column: 1 / 3;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .refs-bar span { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
+  .refs-bar a { color: var(--text-dim); text-decoration: none; }
+  .refs-bar a:hover { color: var(--text-secondary); }
 </style>
+</head>
+<body>
 
-<h2 class="sr-only">APT Threat Map: Salt Typhoon, Lazarus Group, and Mustang Panda — MITRE ATT&CK-mapped profiles</h2>
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">⚡</div>
+    <div class="topbar-title">APT <span>THREAT</span> INTELLIGENCE</div>
+  </div>
+  <div class="topbar-meta">
+    <span class="live">LIVE THREAT TRACKING</span>
+    <span id="clock">--:--:-- UTC</span>
+    <span>3 GROUPS · 80+ NATIONS</span>
+  </div>
+</header>
 
-<div class="header">
-  <h2>APT threat intelligence map</h2>
-  <p>Salt Typhoon · Lazarus Group · Mustang Panda — sourced from MITRE ATT&CK, CISA, Kaspersky, CrowdStrike</p>
-</div>
+<!-- SHELL -->
+<div class="shell">
 
-<div class="tabs">
-  <div class="tab china active" onclick="showPanel('salt')">🌊 Salt Typhoon</div>
-  <div class="tab nk" onclick="showPanel('laz')">☢️ Lazarus Group</div>
-  <div class="tab china2" onclick="showPanel('mp')">🐼 Mustang Panda</div>
-</div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">// Select threat actor</div>
+      <button class="apt-btn salt active" onclick="selectAPT('salt',this)">
+        <span class="apt-icon">🌊</span>
+        <div class="apt-btn-info">
+          <div class="apt-btn-name">Salt Typhoon</div>
+          <div class="apt-btn-sub">PRC · G1045 · ISP/Telecoms</div>
+        </div>
+      </button>
+      <button class="apt-btn laz" onclick="selectAPT('laz',this)">
+        <span class="apt-icon">☢️</span>
+        <div class="apt-btn-info">
+          <div class="apt-btn-name">Lazarus Group</div>
+          <div class="apt-btn-sub">DPRK · G0032 · Nuclear/Finance</div>
+        </div>
+      </button>
+      <button class="apt-btn mp" onclick="selectAPT('mp',this)">
+        <span class="apt-icon">🐼</span>
+        <div class="apt-btn-info">
+          <div class="apt-btn-name">Mustang Panda</div>
+          <div class="apt-btn-sub">PRC · G0129 · Govt/Diplomatic</div>
+        </div>
+      </button>
+    </div>
 
-<!-- SALT TYPHOON -->
-<div class="panel active" id="panel-salt">
-  <div class="actor-header">
-    <div class="actor-badge" style="background:#E6F1FB;">🌊</div>
-    <div class="actor-meta">
-      <h3>Salt Typhoon</h3>
-      <div class="aliases">Also known as: GhostEmperor · FamousSparrow · Earth Estries · UNC2286 · G1045</div>
-      <div class="attribution" style="color:#185FA5;">🇨🇳 PRC Ministry of State Security — active since ≥ 2019</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">// Global threat metrics</div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-val salt">200+</div><div class="stat-lbl">Salt Typhoon orgs</div></div>
+        <div class="stat-box"><div class="stat-val laz">$1.5B</div><div class="stat-lbl">Lazarus stolen</div></div>
+        <div class="stat-box"><div class="stat-val mp">80+</div><div class="stat-lbl">MP targets (govt)</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:var(--red)">3</div><div class="stat-lbl">Nation-state actors</div></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">// Sophistication index</div>
+      <div class="threat-bar">
+        <div class="threat-bar-row">
+          <span class="threat-bar-label">Salt Typhoon</span>
+          <div class="threat-bar-track"><div class="threat-bar-fill" style="width:92%;background:var(--salt)"></div></div>
+          <span class="threat-bar-val">9.2</span>
+        </div>
+        <div class="threat-bar-row">
+          <span class="threat-bar-label">Lazarus</span>
+          <div class="threat-bar-track"><div class="threat-bar-fill" style="width:89%;background:var(--laz)"></div></div>
+          <span class="threat-bar-val">8.9</span>
+        </div>
+        <div class="threat-bar-row">
+          <span class="threat-bar-label">Mustang Panda</span>
+          <div class="threat-bar-track"><div class="threat-bar-fill" style="width:85%;background:var(--mp)"></div></div>
+          <span class="threat-bar-val">8.5</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">// Primary objectives</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--salt);flex-shrink:0"></div>
+          <span style="color:var(--text-secondary)">Communications intercept · Espionage</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--laz);flex-shrink:0"></div>
+          <span style="color:var(--text-secondary)">Nuclear intel · Sanctions-evading crypto</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--mp);flex-shrink:0"></div>
+          <span style="color:var(--text-secondary)">Political intel · Diplomatic data theft</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1">
+      <div class="sidebar-label">// MITRE ATT&amp;CK refs</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <a href="https://attack.mitre.org/groups/G1045/" style="font-family:var(--font-mono);font-size:10px;color:var(--salt);text-decoration:none">↗ MITRE G1045 — Salt Typhoon</a>
+        <a href="https://attack.mitre.org/groups/G0032/" style="font-family:var(--font-mono);font-size:10px;color:var(--laz);text-decoration:none">↗ MITRE G0032 — Lazarus Group</a>
+        <a href="https://attack.mitre.org/groups/G0129/" style="font-family:var(--font-mono);font-size:10px;color:var(--mp);text-decoration:none">↗ MITRE G0129 — Mustang Panda</a>
+        <a href="https://www.cisa.gov" style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-decoration:none">↗ CISA Advisories (AA25-239A)</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <div class="map-area" id="mapArea">
+    <div class="map-overlay-tl">
+      THREAT ORIGIN NODES<br>
+      <span style="color:var(--salt)">■</span> Salt Typhoon (Beijing) &nbsp;
+      <span style="color:var(--laz)">■</span> Lazarus (Pyongyang)<br>
+      <span style="color:var(--mp)">■</span> Mustang Panda (Chengdu)
+    </div>
+    <div class="map-overlay-tr" id="legendTR">
+      <div class="legend-chip active salt" onclick="toggleAPT('salt')"><div class="legend-dot" style="background:var(--salt)"></div>Salt Typhoon</div>
+      <div class="legend-chip active laz" onclick="toggleAPT('laz')"><div class="legend-dot" style="background:var(--laz)"></div>Lazarus Group</div>
+      <div class="legend-chip active mp" onclick="toggleAPT('mp')"><div class="legend-dot" style="background:var(--mp)"></div>Mustang Panda</div>
+    </div>
+    <svg id="globe"></svg>
+    <div id="tooltip"></div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="dp-header">
+      <div class="dp-icon" id="dpIcon">🌊</div>
+      <div>
+        <div class="dp-name salt" id="dpName">Salt Typhoon</div>
+        <div class="dp-meta" id="dpMeta">🇨🇳 PRC Ministry of State Security · Active since 2019 · Origin: Beijing</div>
+      </div>
+      <div class="dp-mitre" id="dpMitre">MITRE ATT&CK<span>G1045</span></div>
+    </div>
+    <div class="dp-grid">
+      <div id="dpLeft">
+        <div class="dp-col-label">// Kill chain (ATT&CK mapped)</div>
+        <div class="ttp-list" id="dpTTPs"></div>
+      </div>
+      <div id="dpRight">
+        <div class="dp-col-label">// Malware & tools</div>
+        <div class="pill-wrap" id="dpTools"></div>
+        <div class="dp-col-label">// CVEs & operations</div>
+        <div class="pill-wrap" id="dpCVEs"></div>
+        <div class="dp-col-label">// Known victims</div>
+        <div class="pill-wrap" id="dpVictims"></div>
+        <div class="dp-col-label" style="margin-top:6px">// Attack targets (map)</div>
+        <div class="pill-wrap" id="dpTargets"></div>
+      </div>
     </div>
   </div>
 
-  <div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">Primary target</div><div class="stat-val" style="font-size:13px;margin-top:2px">ISPs / Telecoms</div></div>
-    <div class="stat-card"><div class="stat-label">Orgs breached</div><div class="stat-val">200+</div></div>
-    <div class="stat-card"><div class="stat-label">Countries hit</div><div class="stat-val">80+</div></div>
-  </div>
+</div><!-- end shell -->
 
-  <div class="section-title">MITRE ATT&CK kill chain</div>
-  <div class="kill-chain">
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#185FA5"></div>
-      <div class="kc-tactic">Initial Access</div>
-      <div class="kc-tech">Exploit public-facing apps (VPN/firewall/Exchange)</div>
-      <div class="kc-id">T1190</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#185FA5"></div>
-      <div class="kc-tactic">Persistence</div>
-      <div class="kc-tech">SSH authorized_keys on routers; scheduled tasks</div>
-      <div class="kc-id">T1098 · T1053</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#185FA5"></div>
-      <div class="kc-tactic">Lateral Movement</div>
-      <div class="kc-tech">Valid accounts (local); living-off-the-land binaries</div>
-      <div class="kc-id">T1078.003</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#185FA5"></div>
-      <div class="kc-tactic">Credential Access</div>
-      <div class="kc-tech">LSASS memory dumping</div>
-      <div class="kc-id">T1003.001</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#185FA5"></div>
-      <div class="kc-tactic">Collection</div>
-      <div class="kc-tech">Intercept subscriber comms; lawful-intercept system access</div>
-      <div class="kc-id">T1557 · T1119</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#185FA5"></div>
-      <div class="kc-tactic">Exfiltration</div>
-      <div class="kc-tech">GhostSpider backdoor C2 over encrypted channels</div>
-      <div class="kc-id">T1041</div>
-    </div>
-  </div>
-
-  <div class="section-title">Key malware &amp; tools</div>
-  <div class="tools-grid">
-    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">GhostSpider</span>
-    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">SparrowDoor</span>
-    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">TrillClient</span>
-    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">Cobalt Strike</span>
-    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">Mimikatz</span>
-    <span class="tool-pill" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">Rootkits (memory)</span>
-  </div>
-
-  <div class="section-title">Exploited CVEs</div>
-  <div class="cve-list">
-    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2023-46805</span>
-    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2024-21887 (Ivanti)</span>
-    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2021-26855 (ProxyLogon)</span>
-    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2018-0171 (Cisco)</span>
-    <span class="cve-pill" style="background:#E6F1FB;color:#0C447C;">CVE-2024-3400 (PAN-OS)</span>
-  </div>
-
-  <div class="section-title">Notable victims (US ISPs/telecoms)</div>
-  <div class="tools-grid">
-    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">AT&amp;T</span>
-    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Verizon</span>
-    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">T-Mobile</span>
-    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Lumen</span>
-    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Spectrum</span>
-    <span class="tool-pill" style="background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary)">Windstream</span>
-  </div>
-
-  <div class="ref-row"><div class="ref-dot" style="background:#185FA5"></div>MITRE ATT&amp;CK G1045 · CISA AA25-239A · Cisco Talos Feb 2025 · Trend Micro (Earth Estries) · Kaspersky (GhostEmperor)</div>
-</div>
-
-<!-- LAZARUS GROUP -->
-<div class="panel" id="panel-laz">
-  <div class="actor-header">
-    <div class="actor-badge" style="background:#EAF3DE;">☢️</div>
-    <div class="actor-meta">
-      <h3>Lazarus Group</h3>
-      <div class="aliases">Also known as: HIDDEN COBRA · Diamond Sleet · ZINC · Labyrinth Chollima · G0032</div>
-      <div class="attribution" style="color:#3B6D11;">🇰🇵 DPRK Reconnaissance General Bureau — active since ≥ 2009</div>
-    </div>
-  </div>
-
-  <div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">Primary target</div><div class="stat-val" style="font-size:13px;margin-top:2px">Nuclear / Finance</div></div>
-    <div class="stat-card"><div class="stat-label">Campaign</div><div class="stat-val" style="font-size:13px;margin-top:2px">Operation DreamJob</div></div>
-    <div class="stat-card"><div class="stat-label">Crypto stolen</div><div class="stat-val">$1.5B+</div></div>
-  </div>
-
-  <div class="section-title">MITRE ATT&CK kill chain — nuclear sector focus</div>
-  <div class="kill-chain">
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#3B6D11"></div>
-      <div class="kc-tactic">Initial Access</div>
-      <div class="kc-tech">Spearphishing via fake job lures (LinkedIn/email)</div>
-      <div class="kc-id">T1566.002</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#3B6D11"></div>
-      <div class="kc-tactic">Execution</div>
-      <div class="kc-tech">Malicious trojanized documents; DLL sideloading</div>
-      <div class="kc-id">T1574.002 · T1204</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#3B6D11"></div>
-      <div class="kc-tactic">Defense Evasion</div>
-      <div class="kc-tech">Extended attributes (macOS) to hide code; signed installers</div>
-      <div class="kc-id">T1564 · T1553</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#3B6D11"></div>
-      <div class="kc-tactic">Credential Access</div>
-      <div class="kc-tech">KernelCallbackTable hijack; CVE-2024-38193 (SYSTEM priv)</div>
-      <div class="kc-id">T1055 · T1068</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#3B6D11"></div>
-      <div class="kc-tactic">Command &amp; Control</div>
-      <div class="kc-tech">CookiePlus malware beacon; multi-stage payload droppers</div>
-      <div class="kc-id">T1071 · T1105</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#3B6D11"></div>
-      <div class="kc-tactic">Exfiltration</div>
-      <div class="kc-tech">Data theft + crypto laundering via mixers</div>
-      <div class="kc-id">T1041 · T1657</div>
-    </div>
-  </div>
-
-  <div class="section-title">Key malware &amp; tools</div>
-  <div class="tools-grid">
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">CookiePlus</span>
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">NineRAT</span>
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">DLRAT</span>
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">BottomLoader</span>
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">ThreatNeedle</span>
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">Dacls RAT</span>
-    <span class="tool-pill" style="background:#EAF3DE;border-color:#C0DD97;color:#27500A">FALLCHILL</span>
-  </div>
-
-  <div class="section-title">Nuclear &amp; critical sector operations</div>
-  <div class="cve-list">
-    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">Operation DreamJob (2024) — nuclear org employees</span>
-    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">Operation Sharpshooter — nuclear/defense/energy</span>
-    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">NPO Mash missile mfr breach</span>
-    <span class="cve-pill" style="background:#EAF3DE;color:#27500A;">CVE-2024-38193 (AFD.sys 0-day)</span>
-  </div>
-
-  <div class="section-title">Motivation dual-track</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-    <div style="flex:1;min-width:140px;border:0.5px solid #C0DD97;border-radius:var(--border-radius-md);padding:10px 12px;background:#EAF3DE20">
-      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:4px">🔍 Espionage</div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">Nuclear/defense intel collection for DPRK regime</div>
-    </div>
-    <div style="flex:1;min-width:140px;border:0.5px solid #C0DD97;border-radius:var(--border-radius-md);padding:10px 12px;background:#EAF3DE20">
-      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:4px">💰 Financial crime</div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">Crypto heists to fund sanctions-evading weapons program</div>
-    </div>
-  </div>
-
-  <div class="ref-row"><div class="ref-dot" style="background:#3B6D11"></div>MITRE ATT&amp;CK G0032 · Kaspersky (Operation DreamJob Dec 2024) · CYFIRMA Q4 2024 · FBI/DOJ indictments · EuRePoC 2024</div>
-</div>
-
-<!-- MUSTANG PANDA -->
-<div class="panel" id="panel-mp">
-  <div class="actor-header">
-    <div class="actor-badge" style="background:#FAEEDA;">🐼</div>
-    <div class="actor-meta">
-      <h3>Mustang Panda</h3>
-      <div class="aliases">Also known as: BRONZE PRESIDENT · RedDelta · TA416 · Earth Preta · Stately Taurus · G0129</div>
-      <div class="attribution" style="color:#854F0B;">🇨🇳 PRC state-aligned — active since ≥ 2012</div>
-    </div>
-  </div>
-
-  <div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">Primary target</div><div class="stat-val" style="font-size:13px;margin-top:2px">Governments / NGOs</div></div>
-    <div class="stat-card"><div class="stat-label">Objective</div><div class="stat-val" style="font-size:13px;margin-top:2px">Sensitive data theft</div></div>
-    <div class="stat-card"><div class="stat-label">Regions</div><div class="stat-val" style="font-size:13px;margin-top:2px">SEA · EU · MENA</div></div>
-  </div>
-
-  <div class="section-title">MITRE ATT&CK kill chain</div>
-  <div class="kill-chain">
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#854F0B"></div>
-      <div class="kc-tactic">Initial Access</div>
-      <div class="kc-tech">Spearphishing attachment (.rar/.lnk); USB worm (SnakeDisk)</div>
-      <div class="kc-id">T1566.001 · T1091</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#854F0B"></div>
-      <div class="kc-tactic">Execution</div>
-      <div class="kc-tech">LNK → PowerShell → PlugX dropper chain</div>
-      <div class="kc-id">T1059.001 · T1204</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#854F0B"></div>
-      <div class="kc-tactic">Persistence</div>
-      <div class="kc-tech">Registry Run keys; DLL sideloading (signed binaries)</div>
-      <div class="kc-id">T1547.001 · T1574.002</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#854F0B"></div>
-      <div class="kc-tactic">Defense Evasion</div>
-      <div class="kc-tech">Obfuscated/encrypted payloads; VSCode tunnel C2</div>
-      <div class="kc-id">T1027 · T1572</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#854F0B"></div>
-      <div class="kc-tactic">Credential Access</div>
-      <div class="kc-tech">NTDS.dit theft via vssadmin; CoolClient browser stealer</div>
-      <div class="kc-id">T1003.003 · T1555</div>
-    </div>
-    <div class="kc-step">
-      <div class="kc-accent" style="background:#854F0B"></div>
-      <div class="kc-tactic">Exfiltration</div>
-      <div class="kc-tech">PlugX C2 beacon; cloud services for data exfil</div>
-      <div class="kc-id">T1567 · T1041</div>
-    </div>
-  </div>
-
-  <div class="section-title">Key malware &amp; tools</div>
-  <div class="tools-grid">
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">PlugX</span>
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">CoolClient</span>
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">SnakeDisk (USB worm)</span>
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">LOTUSLITE</span>
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">DOWNBAIT</span>
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">PUBLOAD</span>
-    <span class="tool-pill" style="background:#FAEEDA;border-color:#FAC775;color:#633806">Bookworm</span>
-  </div>
-
-  <div class="section-title">Notable government targets</div>
-  <div class="cve-list">
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Philippines govt</span>
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Myanmar govt</span>
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Slovakia govt</span>
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">EU diplomatic entities</span>
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Vatican</span>
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">Thailand military (2025)</span>
-    <span class="cve-pill" style="background:#FAEEDA;color:#633806;">ASEAN-Australia Summit delegates</span>
-  </div>
-
-  <div class="section-title">Lure themes used</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-    <div style="flex:1;min-width:130px;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:10px 12px">
-      <div style="font-size:11px;font-weight:500;color:#854F0B;margin-bottom:3px">Geopolitical docs</div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">"EU policy on Russia", conflict zone briefings</div>
-    </div>
-    <div style="flex:1;min-width:130px;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:10px 12px">
-      <div style="font-size:11px;font-weight:500;color:#854F0B;margin-bottom:3px">Govt communications</div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">Diplomatic cables and policy documents</div>
-    </div>
-    <div style="flex:1;min-width:130px;border:0.5px solid #FAC775;border-radius:var(--border-radius-md);padding:10px 12px">
-      <div style="font-size:11px;font-weight:500;color:#854F0B;margin-bottom:3px">USB delivery (2025)</div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">Air-gap bridging via SnakeDisk worm</div>
-    </div>
-  </div>
-
-  <div class="ref-row"><div class="ref-dot" style="background:#854F0B"></div>MITRE ATT&amp;CK G0129 · Unit 42 Sept 2024 · Trend Micro (Earth Preta) · IBM X-Force (SnakeDisk) · MITRE ATT&amp;CK Eval 2025</div>
-</div>
-
-<!-- COMPARISON -->
-<div class="compare-section">
-  <div class="section-title" style="padding: 0 0 8px">Side-by-side comparison</div>
-  <div class="compare-grid">
-    <div class="compare-card" style="border-top: 2px solid #185FA5">
-      <h4 style="color:#185FA5">🌊 Salt Typhoon</h4>
-      <div class="compare-row"><span>Nation</span><span>China (MSS)</span></div>
-      <div class="compare-row"><span>Sector</span><span>ISP / Telecoms</span></div>
-      <div class="compare-row"><span>Goal</span><span>Comms intercept</span></div>
-      <div class="compare-row"><span>Entry</span><span>N-day exploits</span></div>
-      <div class="compare-row"><span>Dwell time</span><span>Months–years</span></div>
-      <div class="compare-row"><span>Signature tool</span><span>GhostSpider</span></div>
-    </div>
-    <div class="compare-card" style="border-top: 2px solid #3B6D11">
-      <h4 style="color:#3B6D11">☢️ Lazarus Group</h4>
-      <div class="compare-row"><span>Nation</span><span>N. Korea (RGB)</span></div>
-      <div class="compare-row"><span>Sector</span><span>Nuclear / Crypto</span></div>
-      <div class="compare-row"><span>Goal</span><span>Espionage + theft</span></div>
-      <div class="compare-row"><span>Entry</span><span>Fake job offers</span></div>
-      <div class="compare-row"><span>Dwell time</span><span>Weeks–months</span></div>
-      <div class="compare-row"><span>Signature tool</span><span>CookiePlus</span></div>
-    </div>
-    <div class="compare-card" style="border-top: 2px solid #854F0B">
-      <h4 style="color:#854F0B">🐼 Mustang Panda</h4>
-      <div class="compare-row"><span>Nation</span><span>China (state)</span></div>
-      <div class="compare-row"><span>Sector</span><span>Govt / Diplomatic</span></div>
-      <div class="compare-row"><span>Goal</span><span>Political intel</span></div>
-      <div class="compare-row"><span>Entry</span><span>Spearphish + USB</span></div>
-      <div class="compare-row"><span>Dwell time</span><span>Long-term</span></div>
-      <div class="compare-row"><span>Signature tool</span><span>PlugX / SnakeDisk</span></div>
-    </div>
-  </div>
-</div>
-
+<!-- D3 + TopoJSON -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
-function showPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-  const tabMap = { salt: 0, laz: 1, mp: 2 };
-  document.querySelectorAll('.tab')[tabMap[id]].classList.add('active');
+// === DATA ===
+const APTS = {
+  salt: {
+    id:'salt', cls:'salt', label:'Salt Typhoon', mitre:'G1045', flag:'🇨🇳',
+    nation:'PRC Ministry of State Security', active:'2019', origin_label:'Beijing',
+    icon:'🌊', color:'#378ADD',
+    origin:{lon:116.4,lat:39.9},
+    targets:[
+      {lon:-87.6,lat:41.8,label:'USA — AT&T, Verizon, T-Mobile, Lumen'},
+      {lon:-0.1,lat:51.5,label:'UK — BT, Virgin Media'},
+      {lon:139.7,lat:35.7,label:'Japan — NTT, KDDI'},
+      {lon:151.2,lat:-33.9,label:'Australia — Telstra'},
+      {lon:101.7,lat:3.1,label:'Southeast Asia — telecoms'},
+      {lon:37.6,lat:55.7,label:'Europe — various ISPs'},
+    ],
+    ttps:[
+      {id:'T1190',tactic:'Initial Access',tech:'Exploit public-facing VPN/firewall (Ivanti, PAN-OS, Exchange)'},
+      {id:'T1098',tactic:'Persistence',tech:'SSH authorized_keys on compromised routers'},
+      {id:'T1053',tactic:'Persistence',tech:'Scheduled tasks for recurring malware execution'},
+      {id:'T1078.003',tactic:'Lateral Movement',tech:'Valid local accounts — living-off-the-land'},
+      {id:'T1003.001',tactic:'Credential Access',tech:'LSASS memory dump via Mimikatz'},
+      {id:'T1557',tactic:'Collection',tech:'Abuse lawful-intercept systems for comms interception'},
+      {id:'T1041',tactic:'Exfiltration',tech:'GhostSpider C2 over encrypted channels'},
+    ],
+    tools:['GhostSpider','SparrowDoor','TrillClient','Cobalt Strike','Mimikatz','Rootkits (memory)'],
+    cves:['CVE-2023-46805','CVE-2024-21887','CVE-2021-26855','CVE-2018-0171','CVE-2024-3400'],
+    victims:['AT&T','Verizon','T-Mobile','Lumen','Spectrum','Windstream','Consolidated Comms'],
+  },
+  laz: {
+    id:'laz', cls:'laz', label:'Lazarus Group', mitre:'G0032', flag:'🇰🇵',
+    nation:'DPRK Reconnaissance General Bureau', active:'2009', origin_label:'Pyongyang',
+    icon:'☢️', color:'#5cb85c',
+    origin:{lon:125.7,lat:39.0},
+    targets:[
+      {lon:-77.0,lat:38.9,label:'USA — nuclear laboratories'},
+      {lon:126.9,lat:37.5,label:'South Korea — defense/crypto'},
+      {lon:139.7,lat:35.7,label:'Japan — DMM Bitcoin ($305M)'},
+      {lon:2.3,lat:48.9,label:'Europe — financial institutions'},
+      {lon:72.8,lat:18.9,label:'India — WazirX ($235M)'},
+      {lon:-43.2,lat:-22.9,label:'Latin America — crypto'},
+    ],
+    ttps:[
+      {id:'T1566.002',tactic:'Initial Access',tech:'Fake job lures via LinkedIn — Operation DreamJob'},
+      {id:'T1574.002',tactic:'Execution',tech:'DLL sideloading via trojanized/signed installers'},
+      {id:'T1564',tactic:'Defense Evasion',tech:'macOS extended-attribute (EA) code hiding'},
+      {id:'T1553',tactic:'Defense Evasion',tech:'Subvert trust controls — code-signing abuse'},
+      {id:'T1068',tactic:'Privilege Escalation',tech:'CVE-2024-38193 — AFD.sys 0-day (SYSTEM access)'},
+      {id:'T1071',tactic:'C2',tech:'CookiePlus multi-stage beacon; NineRAT RAT'},
+      {id:'T1657',tactic:'Exfiltration',tech:'Crypto theft → laundering via mixers'},
+    ],
+    tools:['CookiePlus','NineRAT','DLRAT','BottomLoader','ThreatNeedle','Dacls RAT','FALLCHILL'],
+    cves:['CVE-2024-38193 (0-day)','Op. DreamJob (nuclear 2024)','Op. Sharpshooter','Bybit heist $1.5B'],
+    victims:['Nuclear org employees','WazirX ($235M)','DMM Bitcoin ($305M)','Bybit ($1.5B)','NPO Mash'],
+  },
+  mp: {
+    id:'mp', cls:'mp', label:'Mustang Panda', mitre:'G0129', flag:'🇨🇳',
+    nation:'PRC State-aligned (MSS)', active:'2012', origin_label:'Chengdu',
+    icon:'🐼', color:'#EF9F27',
+    origin:{lon:104.1,lat:30.6},
+    targets:[
+      {lon:120.9,lat:14.6,label:'Philippines — govt agencies'},
+      {lon:18.6,lat:54.3,label:'EU — diplomatic entities, Poland'},
+      {lon:96.1,lat:16.8,label:'Myanmar — government ministries'},
+      {lon:100.5,lat:13.7,label:'Thailand — military (SnakeDisk 2025)'},
+      {lon:28.0,lat:48.4,label:'Eastern Europe — Moldova, Slovakia'},
+      {lon:12.5,lat:41.9,label:'Vatican — diplomatic channels'},
+    ],
+    ttps:[
+      {id:'T1566.001',tactic:'Initial Access',tech:'Spearphish attachment (.rar/.lnk geopolitical lures)'},
+      {id:'T1091',tactic:'Initial Access',tech:'USB worm (SnakeDisk) for air-gap bridging'},
+      {id:'T1059.001',tactic:'Execution',tech:'LNK → PowerShell → PlugX dropper chain'},
+      {id:'T1574.002',tactic:'Persistence',tech:'DLL sideloading via signed legitimate binaries'},
+      {id:'T1547.001',tactic:'Persistence',tech:'Registry Run keys for startup persistence'},
+      {id:'T1003.003',tactic:'Credential Access',tech:'NTDS.dit theft via vssadmin shadow copy'},
+      {id:'T1567',tactic:'Exfiltration',tech:'Cloud-service exfil; PlugX C2 beacon'},
+    ],
+    tools:['PlugX','CoolClient','SnakeDisk','LOTUSLITE','DOWNBAIT','PUBLOAD','Bookworm'],
+    cves:['LNK→PS→PlugX chain','VSCode tunnel C2 abuse','SnakeDisk USB (air-gap)','CoolClient browser stealer'],
+    victims:['Philippines govt','Myanmar ministries','Slovakia govt','EU diplomatic','Vatican','Thailand military'],
+  }
+};
+
+// Visibility state
+const vis = {salt:true, laz:true, mp:true};
+let currentAPT = 'salt';
+
+// === CLOCK ===
+function updateClock(){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds())+' UTC';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// === MAP ===
+const W = 900, H = 460;
+let svgEl, world;
+
+function initMap() {
+  const container = document.getElementById('mapArea');
+  const w = container.clientWidth - 280;
+  const h = container.clientHeight - 340;
+  const actualW = Math.max(600, w);
+  const actualH = Math.max(300, h);
+
+  d3.select('#globe').attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet');
+  svgEl = d3.select('#globe');
+  svgEl.selectAll('*').remove();
+
+  const proj = d3.geoNaturalEarth1().scale(155).translate([W/2, H/2+10]);
+  const pathGen = d3.geoPath(proj);
+
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(topo => {
+    world = topo;
+    drawMap(proj, pathGen);
+  }).catch(() => {
+    svgEl.append('text').attr('x',W/2).attr('y',H/2)
+      .attr('text-anchor','middle').attr('fill','#4a5568').attr('font-size','13')
+      .text('Map data unavailable — check network connection');
+  });
+}
+
+function drawMap(proj, pathGen) {
+  if(!world) return;
+  svgEl.selectAll('*').remove();
+
+  const countries = topojson.feature(world, world.objects.countries);
+
+  svgEl.append('rect').attr('width',W).attr('height',H).attr('fill','#060e1c');
+
+  // Grid lines (graticule)
+  const graticule = d3.geoGraticule();
+  svgEl.append('path').datum(graticule()).attr('d',pathGen)
+    .attr('fill','none').attr('stroke','rgba(255,255,255,0.04)').attr('stroke-width','0.5');
+
+  // Countries
+  svgEl.append('g').selectAll('path').data(countries.features).join('path')
+    .attr('d',pathGen).attr('fill','#111d2e').attr('stroke','#1e3050').attr('stroke-width','0.5');
+
+  const tooltip = document.getElementById('tooltip');
+  const mapAreaEl = document.getElementById('mapArea');
+
+  Object.values(APTS).forEach(apt => {
+    if(!vis[apt.id]) return;
+
+    const [ox,oy] = proj([apt.origin.lon, apt.origin.lat]);
+
+    // Attack arcs
+    apt.targets.forEach(t => {
+      const [tx,ty] = proj([t.lon, t.lat]);
+      const mx = (ox+tx)/2;
+      const my = Math.min(oy,ty) - 55;
+
+      svgEl.append('path')
+        .attr('d',`M${ox},${oy} Q${mx},${my} ${tx},${ty}`)
+        .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1.3')
+        .attr('opacity','0.5').attr('class','atk-arc')
+        .style('cursor','pointer')
+        .on('mouseenter', function(event) {
+          tooltip.innerHTML = `<strong style="color:${apt.color}">${apt.label}</strong><br>${t.label}`;
+          tooltip.classList.add('show');
+        })
+        .on('mousemove', function(event) {
+          const rect = mapAreaEl.getBoundingClientRect();
+          tooltip.style.left = (event.clientX - rect.left + 12)+'px';
+          tooltip.style.top  = (event.clientY - rect.top + 12)+'px';
+        })
+        .on('mouseleave', function() { tooltip.classList.remove('show'); })
+        .on('click', () => selectAPT(apt.id, document.querySelector(`.apt-btn.${apt.id}`)));
+    });
+
+    // Target nodes
+    apt.targets.forEach(t => {
+      const [tx,ty] = proj([t.lon, t.lat]);
+      svgEl.append('circle').attr('cx',tx).attr('cy',ty).attr('r',4)
+        .attr('fill','#1e3050').attr('stroke',apt.color).attr('stroke-width','1.2');
+      svgEl.append('circle').attr('cx',tx).attr('cy',ty).attr('r',4)
+        .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1')
+        .attr('class','origin-pulse').attr('opacity','0.4')
+        .style('animation-delay', Math.random()*2+'s');
+    });
+
+    // Origin node
+    const grp = svgEl.append('g').style('cursor','pointer')
+      .on('click', () => selectAPT(apt.id, document.querySelector(`.apt-btn.${apt.id}`)))
+      .on('mouseenter', function(event) {
+        tooltip.innerHTML = `<strong style="color:${apt.color}">${apt.label}</strong><br>Origin: ${apt.origin_label}<br>${apt.targets.length} active attack vectors`;
+        tooltip.classList.add('show');
+      })
+      .on('mousemove', function(event) {
+        const rect = mapAreaEl.getBoundingClientRect();
+        tooltip.style.left = (event.clientX - rect.left + 12)+'px';
+        tooltip.style.top  = (event.clientY - rect.top + 12)+'px';
+      })
+      .on('mouseleave', function() { tooltip.classList.remove('show'); });
+
+    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',12)
+      .attr('fill',apt.color).attr('opacity','0.12');
+    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',12)
+      .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1.2')
+      .attr('class','origin-pulse');
+    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',6)
+      .attr('fill',apt.color);
+    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',3)
+      .attr('fill','#fff').attr('opacity','0.7');
+
+    // Label
+    grp.append('text')
+      .attr('x',ox+13).attr('y',oy-4)
+      .attr('fill',apt.color)
+      .attr('font-size','10')
+      .attr('font-family','Share Tech Mono, monospace')
+      .attr('font-weight','600')
+      .text(apt.label);
+    grp.append('text')
+      .attr('x',ox+13).attr('y',oy+7)
+      .attr('fill','rgba(255,255,255,0.4)')
+      .attr('font-size','9')
+      .attr('font-family','Share Tech Mono, monospace')
+      .text(apt.origin_label);
+  });
+}
+
+let _proj, _pathGen;
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(topo => {
+  world = topo;
+  _proj = d3.geoNaturalEarth1().scale(155).translate([W/2, H/2+10]);
+  _pathGen = d3.geoPath(_proj);
+  d3.select('#globe').attr('viewBox',`0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet');
+  svgEl = d3.select('#globe');
+  drawMap(_proj, _pathGen);
+  renderDetail('salt');
+}).catch(() => {
+  d3.select('#globe').attr('viewBox',`0 0 900 460`);
+  svgEl = d3.select('#globe');
+  svgEl.append('rect').attr('width',900).attr('height',460).attr('fill','#060e1c');
+  svgEl.append('text').attr('x',450).attr('y',230).attr('text-anchor','middle').attr('fill','#4a5568').attr('font-size','14').text('Map data unavailable');
+  renderDetail('salt');
+});
+
+// === INTERACTIONS ===
+function toggleAPT(id) {
+  vis[id] = !vis[id];
+  const chips = document.querySelectorAll('.legend-chip');
+  chips.forEach(c => {
+    if(c.classList.contains(id)) {
+      if(vis[id]) c.classList.add('active'); else c.classList.remove('active');
+    }
+  });
+  if(_proj && _pathGen) drawMap(_proj, _pathGen);
+}
+
+function selectAPT(id, btn) {
+  currentAPT = id;
+  document.querySelectorAll('.apt-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderDetail(id);
+
+  // Highlight on map
+  vis[id] = true;
+  const chip = document.querySelector(`.legend-chip.${id}`);
+  if(chip) chip.classList.add('active');
+  if(_proj && _pathGen) drawMap(_proj, _pathGen);
+}
+
+function renderDetail(id) {
+  const apt = APTS[id];
+  document.getElementById('dpIcon').textContent = apt.icon;
+  document.getElementById('dpName').textContent = apt.label;
+  document.getElementById('dpName').className = 'dp-name '+apt.cls;
+  document.getElementById('dpMeta').textContent = apt.flag+' '+apt.nation+' · Active since '+apt.active+' · Origin: '+apt.origin_label;
+  document.getElementById('dpMitre').innerHTML = 'MITRE ATT&CK<span>'+apt.mitre+'</span>';
+
+  document.getElementById('dpTTPs').innerHTML = apt.ttps.map(t =>
+    `<div class="ttp-row">
+      <span class="ttp-num">${t.id}</span>
+      <div class="ttp-right">
+        <div class="ttp-tactic">${t.tactic}</div>
+        <div class="ttp-tech">${t.tech}</div>
+      </div>
+    </div>`
+  ).join('');
+
+  document.getElementById('dpTools').innerHTML = apt.tools.map(t =>
+    `<span class="pill ${apt.cls}">${t}</span>`).join('');
+
+  document.getElementById('dpCVEs').innerHTML = apt.cves.map(c =>
+    `<span class="pill neutral">${c}</span>`).join('');
+
+  document.getElementById('dpVictims').innerHTML = apt.victims.map(v =>
+    `<span class="victim-pill">${v}</span>`).join('');
+
+  document.getElementById('dpTargets').innerHTML = apt.targets.map(t =>
+    `<span class="pill ${apt.cls}">${t.label}</span>`).join('');
 }
 </script>
+</body>
+</html>
