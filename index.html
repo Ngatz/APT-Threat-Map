@@ -5,561 +5,498 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>APT Threat Intelligence Map — Salt Typhoon · Lazarus Group · Mustang Panda</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-  :root {
-    --bg-deep: #060b14;
-    --bg-panel: #0b1220;
-    --bg-card: #0f1a2e;
-    --bg-hover: #132035;
-    --border: rgba(255,255,255,0.07);
-    --border-bright: rgba(255,255,255,0.15);
-    --text-primary: #e2e8f0;
-    --text-secondary: #8899aa;
-    --text-dim: #4a5568;
-    --salt: #378ADD;
-    --salt-light: #85B7EB;
-    --salt-dim: rgba(55,138,221,0.15);
-    --laz: #5cb85c;
-    --laz-light: #8dd68d;
-    --laz-dim: rgba(92,184,92,0.15);
-    --mp: #EF9F27;
-    --mp-light: #FAC775;
-    --mp-dim: rgba(239,159,39,0.15);
-    --red: #e24b4a;
-    --font-display: 'Rajdhani', sans-serif;
-    --font-body: 'Exo 2', sans-serif;
-    --font-mono: 'Share Tech Mono', monospace;
-  }
+:root {
+  --bg:        #eeecde;
+  --bg-panel:  #e4e1d0;
+  --bg-card:   #dedad0;
+  --bg-map:    #d5d1be;
+  --border:    rgba(0,0,0,0.10);
+  --border-md: rgba(0,0,0,0.18);
+  --text-dark: #1a1a2e;
+  --text-mid:  #3a3a5c;
+  --text-soft: #6b6b8a;
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  --salt:      #1d3a8a;
+  --salt-bg:   #d0d9f0;
+  --salt-acc:  #e63946;
 
-  body {
-    background: var(--bg-deep);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  --laz:       #1c5c1c;
+  --laz-bg:    #cce8cc;
+  --laz-acc:   #f4a261;
 
-  /* Scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-    pointer-events: none;
-    z-index: 9999;
-  }
+  --mp:        #7b2d00;
+  --mp-bg:     #f2dbc8;
+  --mp-acc:    #e9c46a;
 
-  /* === TOP BAR === */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 24px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(6,11,20,0.95);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .topbar-logo {
-    width: 28px;
-    height: 28px;
-    background: var(--red);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-  }
-  .topbar-title {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-primary);
-  }
-  .topbar-title span { color: var(--red); }
-  .topbar-meta {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    display: flex;
-    gap: 20px;
-  }
-  .topbar-meta .live {
-    color: var(--laz);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .topbar-meta .live::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--laz);
-    border-radius: 50%;
-    animation: blink 1.2s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  --font-head: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
 
-  /* === LAYOUT === */
-  .shell {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    grid-template-rows: auto 1fr;
-    height: calc(100vh - 49px);
-    overflow: hidden;
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* === SIDEBAR === */
-  .sidebar {
-    grid-row: 1 / 3;
-    background: var(--bg-panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+body {
+  background: var(--bg);
+  color: var(--text-dark);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
-  .sidebar-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-  }
+/* ── TOP BAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 54px;
+  background: #1a1a2e;
+  border-bottom: 3px solid var(--salt-acc);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-badge {
+  background: var(--salt-acc);
+  color: #fff;
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+.topbar-title {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.topbar-title span { color: var(--salt-acc); }
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.40);
+}
+.live-dot {
+  display: flex; align-items: center; gap: 6px;
+  color: #4ade80;
+}
+.live-dot::before {
+  content: '';
+  width: 7px; height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
 
-  /* APT Selector Buttons */
-  .apt-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px 12px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    margin-bottom: 8px;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .apt-btn::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    border-radius: 3px 0 0 3px;
-  }
-  .apt-btn.salt::before { background: var(--salt); }
-  .apt-btn.laz::before { background: var(--laz); }
-  .apt-btn.mp::before { background: var(--mp); }
-  .apt-btn:hover, .apt-btn.active {
-    background: var(--bg-hover);
-    border-color: var(--border-bright);
-  }
-  .apt-btn.active.salt { border-color: var(--salt); box-shadow: 0 0 0 1px rgba(55,138,221,0.3); }
-  .apt-btn.active.laz  { border-color: var(--laz); box-shadow: 0 0 0 1px rgba(92,184,92,0.3); }
-  .apt-btn.active.mp   { border-color: var(--mp); box-shadow: 0 0 0 1px rgba(239,159,39,0.3); }
+/* ── SHELL ── */
+.shell {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  height: calc(100vh - 54px);
+  overflow: hidden;
+}
 
-  .apt-icon { font-size: 18px; }
-  .apt-btn-info { flex: 1; text-align: left; }
-  .apt-btn-name { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); }
-  .apt-btn-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-md);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
 
-  /* Stat block */
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stat-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px;
-  }
-  .stat-val { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
-  .stat-val.salt { color: var(--salt); }
-  .stat-val.laz  { color: var(--laz); }
-  .stat-val.mp   { color: var(--mp); }
-  .stat-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.sb-head {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-soft);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
 
-  /* === MAP AREA === */
-  .map-area {
-    position: relative;
-    overflow: hidden;
-    background: #060e1c;
-  }
-  #globe { width: 100%; height: 100%; }
+/* APT selector buttons */
+.apt-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  text-align: left;
+}
+.apt-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.apt-btn.salt::before { background: var(--salt); }
+.apt-btn.laz::before  { background: var(--laz); }
+.apt-btn.mp::before   { background: var(--mp); }
+.apt-btn:hover        { background: var(--bg-card); }
+.apt-btn.active.salt  { background: var(--salt-bg); }
+.apt-btn.active.laz   { background: var(--laz-bg); }
+.apt-btn.active.mp    { background: var(--mp-bg); }
+.apt-icon    { font-size: 20px; }
+.apt-name    { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--text-dark); }
+.apt-sub     { font-family: var(--font-mono); font-size: 10px; color: var(--text-soft); margin-top: 2px; }
 
-  .map-overlay-tl {
-    position: absolute;
-    top: 12px; left: 12px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    line-height: 1.8;
-  }
-  .map-overlay-tr {
-    position: absolute;
-    top: 12px; right: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: flex-end;
-  }
-  .legend-chip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(6,11,20,0.75);
-    backdrop-filter: blur(6px);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-  .legend-chip:hover { border-color: var(--border-bright); }
-  .legend-chip.active.salt { border-color: var(--salt); color: var(--salt-light); }
-  .legend-chip.active.laz  { border-color: var(--laz); color: var(--laz-light); }
-  .legend-chip.active.mp   { border-color: var(--mp); color: var(--mp-light); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+/* Sidebar stat grid */
+.sb-section  { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.sb-lbl      { font-family: var(--font-mono); font-size: 10px; color: var(--text-soft); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.stat-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box    { background: var(--bg-card); border: 1px solid var(--border-md); border-radius: 6px; padding: 10px 8px; }
+.stat-val    { font-family: var(--font-head); font-size: 22px; font-weight: 700; }
+.stat-val.salt { color: var(--salt); }
+.stat-val.laz  { color: var(--laz); }
+.stat-val.mp   { color: var(--mp); }
+.stat-lbl    { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
 
-  /* === DETAIL PANEL === */
-  .detail-panel {
-    background: var(--bg-panel);
-    border-top: 1px solid var(--border);
-    overflow-y: auto;
-    max-height: 340px;
-    padding: 16px 20px;
-  }
-  .detail-panel::-webkit-scrollbar { width: 4px; }
-  .detail-panel::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+/* Sophistication bar */
+.soph-row    { margin-bottom: 8px; }
+.soph-name   { font-size: 11px; color: var(--text-mid); margin-bottom: 4px; display: flex; justify-content: space-between; }
+.soph-track  { height: 6px; background: var(--bg-card); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+.soph-fill   { height: 100%; border-radius: 3px; }
 
-  .detail-panel.hidden { display: none; }
+/* Objective tags */
+.obj-row     { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 12px; color: var(--text-mid); }
+.obj-dot     { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
 
-  .dp-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  .dp-icon { font-size: 28px; }
-  .dp-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
-  .dp-name.salt { color: var(--salt); }
-  .dp-name.laz  { color: var(--laz); }
-  .dp-name.mp   { color: var(--mp); }
-  .dp-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 3px; }
-  .dp-mitre {
-    margin-left: auto;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 8px;
-    text-align: center;
-    white-space: nowrap;
-  }
-  .dp-mitre span { display: block; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+/* MITRE refs */
+.mitre-link  { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--salt); text-decoration: none; margin-bottom: 5px; }
+.mitre-link:hover { text-decoration: underline; }
 
-  .dp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .dp-col-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--border);
-  }
+/* ── MAP AREA ── */
+.map-area {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-map);
+  display: flex;
+  flex-direction: column;
+}
+#globe { width: 100%; flex: 1 1 auto; min-height: 0; }
 
-  /* TTP cards */
-  .ttp-list { display: flex; flex-direction: column; gap: 6px; }
-  .ttp-row {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 8px 10px;
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
-  .ttp-num {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    color: var(--text-dim);
-    min-width: 58px;
-    margin-top: 2px;
-  }
-  .ttp-right { flex: 1; }
-  .ttp-tactic { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-bottom: 2px; }
-  .ttp-tech { font-family: var(--font-body); font-size: 12px; color: var(--text-primary); }
+.map-legend {
+  position: absolute;
+  top: 12px; right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.leg-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(238,236,222,0.88);
+  backdrop-filter: blur(4px);
+  border: 1.5px solid var(--border-md);
+  border-radius: 4px;
+  padding: 5px 11px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.leg-chip:hover { border-color: rgba(0,0,0,0.35); }
+.leg-chip.active.salt { border-color: var(--salt); color: var(--salt); background: var(--salt-bg); }
+.leg-chip.active.laz  { border-color: var(--laz);  color: var(--laz);  background: var(--laz-bg); }
+.leg-chip.active.mp   { border-color: var(--mp);   color: var(--mp);   background: var(--mp-bg); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-  /* Pills */
-  .pill-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-  .pill {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 3px;
-    border: 1px solid;
-  }
-  .pill.salt { background: rgba(55,138,221,0.1); border-color: rgba(55,138,221,0.4); color: var(--salt-light); }
-  .pill.laz  { background: rgba(92,184,92,0.1); border-color: rgba(92,184,92,0.4); color: var(--laz-light); }
-  .pill.mp   { background: rgba(239,159,39,0.1); border-color: rgba(239,159,39,0.4); color: var(--mp-light); }
-  .pill.neutral { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text-secondary); }
+.map-hint {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-soft);
+  background: rgba(238,236,222,0.75);
+  padding: 3px 10px;
+  border-radius: 3px;
+  pointer-events: none;
+}
 
-  .victim-pill {
-    font-family: var(--font-body);
-    font-size: 11px;
-    padding: 3px 9px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-  }
+/* tooltip */
+#tip {
+  position: absolute;
+  background: #1a1a2e;
+  color: #eeecde;
+  border-radius: 5px;
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 50;
+  max-width: 220px;
+  line-height: 1.5;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+#tip.show { opacity: 1; }
 
-  /* Threat timeline bar */
-  .threat-bar { margin: 10px 0; }
-  .threat-bar-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 5px;
-  }
-  .threat-bar-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); width: 80px; flex-shrink: 0; }
-  .threat-bar-track {
-    flex: 1;
-    height: 6px;
-    background: var(--bg-card);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .threat-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.5s ease;
-  }
-  .threat-bar-val { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); width: 30px; text-align: right; }
+/* ── DETAIL PANEL ── */
+.detail-panel {
+  background: var(--bg-panel);
+  border-top: 2px solid var(--border-md);
+  overflow-y: auto;
+  max-height: 320px;
+  padding: 16px 22px;
+  flex-shrink: 0;
+}
+.detail-panel::-webkit-scrollbar { width: 4px; }
+.detail-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+.detail-panel.hidden { display: none; }
 
-  /* Pulse animation for map */
-  @keyframes pulse-ring { 0%{r:6;opacity:0.8} 70%{r:16;opacity:0} 100%{r:16;opacity:0} }
-  @keyframes dash-flow { to{stroke-dashoffset:-20} }
+.dp-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-md);
+}
+.dp-icon   { font-size: 30px; }
+.dp-name   { font-family: var(--font-head); font-size: 24px; font-weight: 700; line-height: 1; }
+.dp-name.salt { color: var(--salt); }
+.dp-name.laz  { color: var(--laz); }
+.dp-name.mp   { color: var(--mp); }
+.dp-meta   { font-size: 12px; color: var(--text-soft); margin-top: 4px; }
+.dp-mitre  {
+  margin-left: auto; flex-shrink: 0;
+  background: #1a1a2e;
+  color: #eeecde;
+  border-radius: 5px;
+  padding: 5px 12px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.dp-mitre span { display: block; font-size: 15px; font-weight: 700; margin-top: 2px; }
 
-  .atk-arc { stroke-dasharray: 6 4; animation: dash-flow 1.8s linear infinite; }
-  .origin-pulse { animation: pulse-ring 2.2s ease-out infinite; }
+/* detail grid */
+.dp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 
-  /* Responsive */
-  @media(max-width: 900px) {
-    .shell { grid-template-columns: 1fr; }
-    .sidebar { grid-row: auto; max-height: 300px; }
-  }
+.dp-col-lbl {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-soft);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border-md);
+}
 
-  /* Tooltip */
-  #tooltip {
-    position: absolute;
-    background: rgba(6,11,20,0.92);
-    border: 1px solid var(--border-bright);
-    border-radius: 5px;
-    padding: 7px 11px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-primary);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 50;
-    max-width: 200px;
-    line-height: 1.5;
-  }
-  #tooltip.show { opacity: 1; }
+/* TTP rows */
+.ttp-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 7px 8px;
+  background: var(--bg-card);
+  border-radius: 5px;
+  margin-bottom: 5px;
+  border: 1px solid var(--border);
+}
+.ttp-id      { font-family: var(--font-mono); font-size: 9px; color: var(--text-soft); min-width: 62px; padding-top: 2px; }
+.ttp-tactic  { font-size: 9px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; }
+.ttp-tech    { font-size: 12px; color: var(--text-dark); margin-top: 2px; line-height: 1.3; }
 
-  /* Footer refs */
-  .refs-bar {
-    grid-column: 1 / 3;
-    background: var(--bg-panel);
-    border-top: 1px solid var(--border);
-    padding: 8px 20px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .refs-bar span { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
-  .refs-bar a { color: var(--text-dim); text-decoration: none; }
-  .refs-bar a:hover { color: var(--text-secondary); }
+/* impact rows */
+.impact-row {
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 7px 8px;
+  background: var(--bg-card);
+  border-radius: 5px;
+  margin-bottom: 5px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+.impact-bullet { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+
+/* Pills */
+.pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+.pill.salt { background: var(--salt-bg); border-color: var(--salt); color: var(--salt); }
+.pill.laz  { background: var(--laz-bg);  border-color: var(--laz);  color: var(--laz); }
+.pill.mp   { background: var(--mp-bg);   border-color: var(--mp);   color: var(--mp); }
+.pill.neutral { background: var(--bg-card); border-color: var(--border-md); color: var(--text-mid); }
+.victim-pill { font-size: 11px; padding: 3px 9px; border-radius: 3px; background: var(--bg-card); border: 1px solid var(--border-md); color: var(--text-mid); }
+
+/* map animations */
+@keyframes arc-flow { to { stroke-dashoffset: -20; } }
+@keyframes ring-pulse { 0%{r:6;opacity:0.9} 70%{r:18;opacity:0} 100%{r:18;opacity:0} }
+.atk-arc { stroke-dasharray: 7 4; animation: arc-flow 1.8s linear infinite; }
+.origin-ring { animation: ring-pulse 2.4s ease-out infinite; }
 </style>
 </head>
 <body>
 
 <!-- TOP BAR -->
 <header class="topbar">
-  <div class="topbar-brand">
-    <div class="topbar-logo">⚡</div>
-    <div class="topbar-title">APT <span>THREAT</span> INTELLIGENCE</div>
+  <div class="topbar-left">
+    <div class="topbar-badge">APT</div>
+    <div class="topbar-title">THREAT <span>INTELLIGENCE</span> MAP</div>
   </div>
-  <div class="topbar-meta">
-    <span class="live">LIVE THREAT TRACKING</span>
+  <div class="topbar-right">
+    <span class="live-dot">TRACKING ACTIVE</span>
     <span id="clock">--:--:-- UTC</span>
     <span>3 GROUPS · 80+ NATIONS</span>
   </div>
 </header>
 
-<!-- SHELL -->
 <div class="shell">
 
-  <!-- SIDEBAR -->
+  <!-- ── SIDEBAR ── -->
   <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">// Select threat actor</div>
-      <button class="apt-btn salt active" onclick="selectAPT('salt',this)">
-        <span class="apt-icon">🌊</span>
-        <div class="apt-btn-info">
-          <div class="apt-btn-name">Salt Typhoon</div>
-          <div class="apt-btn-sub">PRC · G1045 · ISP/Telecoms</div>
-        </div>
-      </button>
-      <button class="apt-btn laz" onclick="selectAPT('laz',this)">
-        <span class="apt-icon">☢️</span>
-        <div class="apt-btn-info">
-          <div class="apt-btn-name">Lazarus Group</div>
-          <div class="apt-btn-sub">DPRK · G0032 · Nuclear/Finance</div>
-        </div>
-      </button>
-      <button class="apt-btn mp" onclick="selectAPT('mp',this)">
-        <span class="apt-icon">🐼</span>
-        <div class="apt-btn-info">
-          <div class="apt-btn-name">Mustang Panda</div>
-          <div class="apt-btn-sub">PRC · G0129 · Govt/Diplomatic</div>
-        </div>
-      </button>
-    </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">// Global threat metrics</div>
+    <div class="sb-head">// Select threat actor</div>
+
+    <button class="apt-btn salt active" onclick="selectAPT('salt',this)">
+      <span class="apt-icon">🌊</span>
+      <div>
+        <div class="apt-name">Salt Typhoon</div>
+        <div class="apt-sub">PRC · G1045 · ISP / Telecoms</div>
+      </div>
+    </button>
+    <button class="apt-btn laz" onclick="selectAPT('laz',this)">
+      <span class="apt-icon">☢️</span>
+      <div>
+        <div class="apt-name">Lazarus Group</div>
+        <div class="apt-sub">DPRK · G0032 · Nuclear / Finance</div>
+      </div>
+    </button>
+    <button class="apt-btn mp" onclick="selectAPT('mp',this)">
+      <span class="apt-icon">🐼</span>
+      <div>
+        <div class="apt-name">Mustang Panda</div>
+        <div class="apt-sub">PRC · G0129 · Govt / Diplomatic</div>
+      </div>
+    </button>
+
+    <div class="sb-section">
+      <div class="sb-lbl">Global metrics</div>
       <div class="stat-grid">
         <div class="stat-box"><div class="stat-val salt">200+</div><div class="stat-lbl">Salt Typhoon orgs</div></div>
         <div class="stat-box"><div class="stat-val laz">$1.5B</div><div class="stat-lbl">Lazarus stolen</div></div>
-        <div class="stat-box"><div class="stat-val mp">80+</div><div class="stat-lbl">MP targets (govt)</div></div>
-        <div class="stat-box"><div class="stat-val" style="color:var(--red)">3</div><div class="stat-lbl">Nation-state actors</div></div>
+        <div class="stat-box"><div class="stat-val mp">80+</div><div class="stat-lbl">MP govt targets</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:var(--salt-acc)">3</div><div class="stat-lbl">Nation-state actors</div></div>
       </div>
     </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">// Sophistication index</div>
-      <div class="threat-bar">
-        <div class="threat-bar-row">
-          <span class="threat-bar-label">Salt Typhoon</span>
-          <div class="threat-bar-track"><div class="threat-bar-fill" style="width:92%;background:var(--salt)"></div></div>
-          <span class="threat-bar-val">9.2</span>
-        </div>
-        <div class="threat-bar-row">
-          <span class="threat-bar-label">Lazarus</span>
-          <div class="threat-bar-track"><div class="threat-bar-fill" style="width:89%;background:var(--laz)"></div></div>
-          <span class="threat-bar-val">8.9</span>
-        </div>
-        <div class="threat-bar-row">
-          <span class="threat-bar-label">Mustang Panda</span>
-          <div class="threat-bar-track"><div class="threat-bar-fill" style="width:85%;background:var(--mp)"></div></div>
-          <span class="threat-bar-val">8.5</span>
-        </div>
+    <div class="sb-section">
+      <div class="sb-lbl">Sophistication index</div>
+      <div class="soph-row">
+        <div class="soph-name"><span>Salt Typhoon</span><span style="color:var(--salt);font-weight:600">9.2</span></div>
+        <div class="soph-track"><div class="soph-fill" style="width:92%;background:var(--salt)"></div></div>
+      </div>
+      <div class="soph-row">
+        <div class="soph-name"><span>Lazarus Group</span><span style="color:var(--laz);font-weight:600">8.9</span></div>
+        <div class="soph-track"><div class="soph-fill" style="width:89%;background:var(--laz)"></div></div>
+      </div>
+      <div class="soph-row">
+        <div class="soph-name"><span>Mustang Panda</span><span style="color:var(--mp);font-weight:600">8.5</span></div>
+        <div class="soph-track"><div class="soph-fill" style="width:85%;background:var(--mp)"></div></div>
       </div>
     </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">// Primary objectives</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--salt);flex-shrink:0"></div>
-          <span style="color:var(--text-secondary)">Communications intercept · Espionage</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--laz);flex-shrink:0"></div>
-          <span style="color:var(--text-secondary)">Nuclear intel · Sanctions-evading crypto</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--mp);flex-shrink:0"></div>
-          <span style="color:var(--text-secondary)">Political intel · Diplomatic data theft</span>
-        </div>
-      </div>
+    <div class="sb-section">
+      <div class="sb-lbl">Primary objectives</div>
+      <div class="obj-row"><div class="obj-dot" style="background:var(--salt)"></div><span>Communications intercept · Espionage</span></div>
+      <div class="obj-row"><div class="obj-dot" style="background:var(--laz)"></div><span>Nuclear intel · Sanctions-evading crypto</span></div>
+      <div class="obj-row"><div class="obj-dot" style="background:var(--mp)"></div><span>Political intel · Diplomatic data theft</span></div>
     </div>
 
-    <div class="sidebar-section" style="flex:1">
-      <div class="sidebar-label">// MITRE ATT&amp;CK refs</div>
-      <div style="display:flex;flex-direction:column;gap:5px">
-        <a href="https://attack.mitre.org/groups/G1045/" style="font-family:var(--font-mono);font-size:10px;color:var(--salt);text-decoration:none">↗ MITRE G1045 — Salt Typhoon</a>
-        <a href="https://attack.mitre.org/groups/G0032/" style="font-family:var(--font-mono);font-size:10px;color:var(--laz);text-decoration:none">↗ MITRE G0032 — Lazarus Group</a>
-        <a href="https://attack.mitre.org/groups/G0129/" style="font-family:var(--font-mono);font-size:10px;color:var(--mp);text-decoration:none">↗ MITRE G0129 — Mustang Panda</a>
-        <a href="https://www.cisa.gov" style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-decoration:none">↗ CISA Advisories (AA25-239A)</a>
-      </div>
+    <div class="sb-section" style="flex:1">
+      <div class="sb-lbl">MITRE ATT&CK refs</div>
+      <a class="mitre-link" href="https://attack.mitre.org/groups/G1045/" target="_blank">↗ G1045 — Salt Typhoon</a>
+      <a class="mitre-link" style="color:var(--laz)" href="https://attack.mitre.org/groups/G0032/" target="_blank">↗ G0032 — Lazarus Group</a>
+      <a class="mitre-link" style="color:var(--mp)" href="https://attack.mitre.org/groups/G0129/" target="_blank">↗ G0129 — Mustang Panda</a>
+      <a class="mitre-link" style="color:var(--text-soft)" href="https://www.cisa.gov" target="_blank">↗ CISA Advisories (AA25-239A)</a>
     </div>
+
   </aside>
 
-  <!-- MAP -->
-  <div class="map-area" id="mapArea">
-    <div class="map-overlay-tl">
-      THREAT ORIGIN NODES<br>
-      <span style="color:var(--salt)">■</span> Salt Typhoon (Beijing) &nbsp;
-      <span style="color:var(--laz)">■</span> Lazarus (Pyongyang)<br>
-      <span style="color:var(--mp)">■</span> Mustang Panda (Chengdu)
-    </div>
-    <div class="map-overlay-tr" id="legendTR">
-      <div class="legend-chip active salt" onclick="toggleAPT('salt')"><div class="legend-dot" style="background:var(--salt)"></div>Salt Typhoon</div>
-      <div class="legend-chip active laz" onclick="toggleAPT('laz')"><div class="legend-dot" style="background:var(--laz)"></div>Lazarus Group</div>
-      <div class="legend-chip active mp" onclick="toggleAPT('mp')"><div class="legend-dot" style="background:var(--mp)"></div>Mustang Panda</div>
-    </div>
-    <svg id="globe"></svg>
-    <div id="tooltip"></div>
-  </div>
+  <!-- ── MAP + DETAIL ── -->
+  <div style="display:flex;flex-direction:column;overflow:hidden;min-height:0">
 
-  <!-- DETAIL PANEL -->
-  <div class="detail-panel" id="detailPanel">
-    <div class="dp-header">
-      <div class="dp-icon" id="dpIcon">🌊</div>
-      <div>
-        <div class="dp-name salt" id="dpName">Salt Typhoon</div>
-        <div class="dp-meta" id="dpMeta">🇨🇳 PRC Ministry of State Security · Active since 2019 · Origin: Beijing</div>
+    <div class="map-area" style="flex:1 1 auto;min-height:0">
+      <svg id="globe"></svg>
+
+      <div class="map-legend" id="mapLegend">
+        <div class="leg-chip active salt" onclick="toggleAPT('salt')"><div class="leg-dot" style="background:var(--salt)"></div>Salt Typhoon</div>
+        <div class="leg-chip active laz"  onclick="toggleAPT('laz')"><div class="leg-dot" style="background:var(--laz)"></div>Lazarus Group</div>
+        <div class="leg-chip active mp"   onclick="toggleAPT('mp')"><div class="leg-dot" style="background:var(--mp)"></div>Mustang Panda</div>
       </div>
-      <div class="dp-mitre" id="dpMitre">MITRE ATT&CK<span>G1045</span></div>
+
+      <div class="map-hint">Click any origin node or attack arc to explore · Use legend to filter</div>
+      <div id="tip"></div>
     </div>
-    <div class="dp-grid">
-      <div id="dpLeft">
-        <div class="dp-col-label">// Kill chain (ATT&CK mapped)</div>
-        <div class="ttp-list" id="dpTTPs"></div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel hidden" id="detailPanel">
+      <div class="dp-header">
+        <div class="dp-icon" id="dpIcon"></div>
+        <div>
+          <div class="dp-name" id="dpName"></div>
+          <div class="dp-meta" id="dpMeta"></div>
+        </div>
+        <div class="dp-mitre" id="dpMitre"></div>
       </div>
-      <div id="dpRight">
-        <div class="dp-col-label">// Malware & tools</div>
-        <div class="pill-wrap" id="dpTools"></div>
-        <div class="dp-col-label">// CVEs & operations</div>
-        <div class="pill-wrap" id="dpCVEs"></div>
-        <div class="dp-col-label">// Known victims</div>
-        <div class="pill-wrap" id="dpVictims"></div>
-        <div class="dp-col-label" style="margin-top:6px">// Attack targets (map)</div>
-        <div class="pill-wrap" id="dpTargets"></div>
+
+      <div class="dp-grid">
+        <!-- col 1: TTP kill chain -->
+        <div>
+          <div class="dp-col-lbl">ATT&CK kill chain</div>
+          <div id="dpTTPs"></div>
+        </div>
+        <!-- col 2: Impact -->
+        <div>
+          <div class="dp-col-lbl">Impact</div>
+          <div id="dpImpact"></div>
+          <div class="dp-col-lbl" style="margin-top:10px">Malware & tools</div>
+          <div class="pills" id="dpTools"></div>
+        </div>
+        <!-- col 3: victims + targets -->
+        <div>
+          <div class="dp-col-lbl">CVEs & operations</div>
+          <div class="pills" id="dpCVEs"></div>
+          <div class="dp-col-lbl" style="margin-top:10px">Known victims</div>
+          <div class="pills" id="dpVictims"></div>
+          <div class="dp-col-lbl" style="margin-top:10px">Attack vectors on map</div>
+          <div class="pills" id="dpTargets"></div>
+        </div>
       </div>
     </div>
-  </div>
+
+  </div><!-- end right col -->
 
 </div><!-- end shell -->
 
@@ -567,12 +504,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
-// === DATA ===
+// ═══════════════════════════════
+//  DATA
+// ═══════════════════════════════
 const APTS = {
   salt: {
     id:'salt', cls:'salt', label:'Salt Typhoon', mitre:'G1045', flag:'🇨🇳',
     nation:'PRC Ministry of State Security', active:'2019', origin_label:'Beijing',
-    icon:'🌊', color:'#378ADD',
+    icon:'🌊', color:'#1d3a8a', acc:'#e63946',
     origin:{lon:116.4,lat:39.9},
     targets:[
       {lon:-87.6,lat:41.8,label:'USA — AT&T, Verizon, T-Mobile, Lumen'},
@@ -580,289 +519,280 @@ const APTS = {
       {lon:139.7,lat:35.7,label:'Japan — NTT, KDDI'},
       {lon:151.2,lat:-33.9,label:'Australia — Telstra'},
       {lon:101.7,lat:3.1,label:'Southeast Asia — telecoms'},
-      {lon:37.6,lat:55.7,label:'Europe — various ISPs'},
     ],
     ttps:[
-      {id:'T1190',tactic:'Initial Access',tech:'Exploit public-facing VPN/firewall (Ivanti, PAN-OS, Exchange)'},
-      {id:'T1098',tactic:'Persistence',tech:'SSH authorized_keys on compromised routers'},
-      {id:'T1053',tactic:'Persistence',tech:'Scheduled tasks for recurring malware execution'},
-      {id:'T1078.003',tactic:'Lateral Movement',tech:'Valid local accounts — living-off-the-land'},
-      {id:'T1003.001',tactic:'Credential Access',tech:'LSASS memory dump via Mimikatz'},
-      {id:'T1557',tactic:'Collection',tech:'Abuse lawful-intercept systems for comms interception'},
-      {id:'T1041',tactic:'Exfiltration',tech:'GhostSpider C2 over encrypted channels'},
+      {id:'T1190',tactic:'Initial Access',tech:'Exploit public-facing VPN/firewall (Ivanti, PAN-OS)'},
+      {id:'T1078.003',tactic:'Lateral Movement',tech:'Valid local accounts — living off the land'},
+      {id:'T1003.001',tactic:'Credential Access',tech:'LSASS memory dump (Mimikatz)'},
+      {id:'T1557',tactic:'Collection',tech:'Lawful-intercept system abuse'},
+      {id:'T1098',tactic:'Persistence',tech:'SSH authorized_keys on routers'},
+      {id:'T1041',tactic:'Exfiltration',tech:'GhostSpider C2 encrypted exfiltration'},
     ],
-    tools:['GhostSpider','SparrowDoor','TrillClient','Cobalt Strike','Mimikatz','Rootkits (memory)'],
-    cves:['CVE-2023-46805','CVE-2024-21887','CVE-2021-26855','CVE-2018-0171','CVE-2024-3400'],
-    victims:['AT&T','Verizon','T-Mobile','Lumen','Spectrum','Windstream','Consolidated Comms'],
+    impact:[
+      'Intercepted US government officials\' communications',
+      'Accessed US lawful-intercept (wiretap) systems',
+      '9 major US telecoms confirmed breached',
+      'Persistent access maintained months–years undetected',
+      'Subscriber data & call records stolen at scale',
+    ],
+    tools:['GhostSpider','SparrowDoor','TrillClient','Cobalt Strike','Mimikatz','Rootkits'],
+    cves:['CVE-2023-46805','CVE-2024-21887','CVE-2021-26855','CVE-2024-3400','CVE-2018-0171'],
+    victims:['AT&T','Verizon','T-Mobile','Lumen','Spectrum','Windstream'],
   },
   laz: {
     id:'laz', cls:'laz', label:'Lazarus Group', mitre:'G0032', flag:'🇰🇵',
     nation:'DPRK Reconnaissance General Bureau', active:'2009', origin_label:'Pyongyang',
-    icon:'☢️', color:'#5cb85c',
+    icon:'☢️', color:'#1c5c1c', acc:'#f4a261',
     origin:{lon:125.7,lat:39.0},
     targets:[
-      {lon:-77.0,lat:38.9,label:'USA — nuclear laboratories'},
-      {lon:126.9,lat:37.5,label:'South Korea — defense/crypto'},
+      {lon:-77.0,lat:38.9,label:'USA — nuclear labs & defense'},
+      {lon:126.9,lat:37.5,label:'South Korea — defense orgs'},
       {lon:139.7,lat:35.7,label:'Japan — DMM Bitcoin ($305M)'},
       {lon:2.3,lat:48.9,label:'Europe — financial institutions'},
       {lon:72.8,lat:18.9,label:'India — WazirX ($235M)'},
-      {lon:-43.2,lat:-22.9,label:'Latin America — crypto'},
     ],
     ttps:[
-      {id:'T1566.002',tactic:'Initial Access',tech:'Fake job lures via LinkedIn — Operation DreamJob'},
-      {id:'T1574.002',tactic:'Execution',tech:'DLL sideloading via trojanized/signed installers'},
-      {id:'T1564',tactic:'Defense Evasion',tech:'macOS extended-attribute (EA) code hiding'},
-      {id:'T1553',tactic:'Defense Evasion',tech:'Subvert trust controls — code-signing abuse'},
-      {id:'T1068',tactic:'Privilege Escalation',tech:'CVE-2024-38193 — AFD.sys 0-day (SYSTEM access)'},
-      {id:'T1071',tactic:'C2',tech:'CookiePlus multi-stage beacon; NineRAT RAT'},
-      {id:'T1657',tactic:'Exfiltration',tech:'Crypto theft → laundering via mixers'},
+      {id:'T1566.002',tactic:'Initial Access',tech:'Fake job offers via LinkedIn — Op. DreamJob'},
+      {id:'T1574.002',tactic:'Execution',tech:'DLL sideloading via trojanized installers'},
+      {id:'T1564',tactic:'Defense Evasion',tech:'macOS extended-attribute code hiding (novel 2024)'},
+      {id:'T1068',tactic:'Privilege Escalation',tech:'CVE-2024-38193 — AFD.sys 0-day'},
+      {id:'T1071',tactic:'C2',tech:'CookiePlus multi-stage beacon'},
+      {id:'T1657',tactic:'Exfiltration',tech:'Crypto theft + laundering via mixers'},
     ],
-    tools:['CookiePlus','NineRAT','DLRAT','BottomLoader','ThreatNeedle','Dacls RAT','FALLCHILL'],
-    cves:['CVE-2024-38193 (0-day)','Op. DreamJob (nuclear 2024)','Op. Sharpshooter','Bybit heist $1.5B'],
+    impact:[
+      'Stolen nuclear intelligence for DPRK weapons programs',
+      '$659M+ in crypto heists in 2024 alone',
+      'Bybit hack ($1.5B) — largest crypto theft in history',
+      'Funds used to evade international sanctions',
+      'Nuclear facility employees targeted via fake job offers',
+    ],
+    tools:['CookiePlus','NineRAT','DLRAT','BottomLoader','ThreatNeedle','FALLCHILL'],
+    cves:['CVE-2024-38193 (0-day)','Op. DreamJob (nuclear)','Op. Sharpshooter','Bybit $1.5B heist'],
     victims:['Nuclear org employees','WazirX ($235M)','DMM Bitcoin ($305M)','Bybit ($1.5B)','NPO Mash'],
   },
   mp: {
     id:'mp', cls:'mp', label:'Mustang Panda', mitre:'G0129', flag:'🇨🇳',
     nation:'PRC State-aligned (MSS)', active:'2012', origin_label:'Chengdu',
-    icon:'🐼', color:'#EF9F27',
+    icon:'🐼', color:'#7b2d00', acc:'#e9c46a',
     origin:{lon:104.1,lat:30.6},
     targets:[
-      {lon:120.9,lat:14.6,label:'Philippines — govt agencies'},
-      {lon:18.6,lat:54.3,label:'EU — diplomatic entities, Poland'},
+      {lon:110.0,lat:5.0,label:'Southeast Asia — govt agencies'},
+      {lon:16.0,lat:50.0,label:'EU — diplomatic entities, Poland'},
       {lon:96.1,lat:16.8,label:'Myanmar — government ministries'},
-      {lon:100.5,lat:13.7,label:'Thailand — military (SnakeDisk 2025)'},
-      {lon:28.0,lat:48.4,label:'Eastern Europe — Moldova, Slovakia'},
+      {lon:100.5,lat:13.7,label:'Thailand — military (2025)'},
       {lon:106.81,lat:-6.20,label:'Indonesia — government channels'},
     ],
     ttps:[
-      {id:'T1566.001',tactic:'Initial Access',tech:'Spearphish attachment (.rar/.lnk geopolitical lures)'},
+      {id:'T1566.001',tactic:'Initial Access',tech:'Spearphish .rar/.lnk geopolitical lure docs'},
       {id:'T1091',tactic:'Initial Access',tech:'USB worm (SnakeDisk) for air-gap bridging'},
       {id:'T1059.001',tactic:'Execution',tech:'LNK → PowerShell → PlugX dropper chain'},
-      {id:'T1574.002',tactic:'Persistence',tech:'DLL sideloading via signed legitimate binaries'},
-      {id:'T1547.001',tactic:'Persistence',tech:'Registry Run keys for startup persistence'},
+      {id:'T1574.002',tactic:'Persistence',tech:'DLL sideloading via signed binaries'},
       {id:'T1003.003',tactic:'Credential Access',tech:'NTDS.dit theft via vssadmin shadow copy'},
-      {id:'T1567',tactic:'Exfiltration',tech:'Cloud-service exfil; PlugX C2 beacon'},
+      {id:'T1567',tactic:'Exfiltration',tech:'Cloud-service exfil + PlugX C2 beacon'},
+    ],
+    impact:[
+      'Stolen classified govt & diplomatic communications',
+      'Long-term access to sensitive policy networks',
+      'Air-gap bridging via USB worm (SnakeDisk, 2025)',
+      'Active across 80+ countries for geopolitical intel',
+      'Lure docs mimic real EU policy papers & diplomatic cables',
     ],
     tools:['PlugX','CoolClient','SnakeDisk','LOTUSLITE','DOWNBAIT','PUBLOAD','Bookworm'],
     cves:['LNK→PS→PlugX chain','VSCode tunnel C2 abuse','SnakeDisk USB (air-gap)','CoolClient browser stealer'],
-    victims:['Philippines govt','Myanmar ministries','Slovakia govt','EU diplomatic','Indonesia','Thailand military'],
+    victims:['Southeast Asia govts','Myanmar ministries','Slovakia govt','EU diplomatic','Vatican','Thailand military'],
   }
 };
 
-// Visibility state
-const vis = {salt:true, laz:true, mp:true};
-let currentAPT = 'salt';
-
-// === CLOCK ===
-function updateClock(){
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  document.getElementById('clock').textContent =
-    pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds())+' UTC';
+// ═══════════════════════════════
+//  CLOCK
+// ═══════════════════════════════
+function tick(){
+  const n=new Date(), p=x=>String(x).padStart(2,'0');
+  document.getElementById('clock').textContent=p(n.getUTCHours())+':'+p(n.getUTCMinutes())+':'+p(n.getUTCSeconds())+' UTC';
 }
-setInterval(updateClock, 1000);
-updateClock();
+setInterval(tick,1000); tick();
 
-// === MAP ===
-const W = 900, H = 460;
-let svgEl, world;
+// ═══════════════════════════════
+//  MAP
+// ═══════════════════════════════
+const W=920, H=460;
+let svgEl, _proj, _pathGen, world;
+const vis={salt:true,laz:true,mp:true};
+let curAPT='salt';
 
-function initMap() {
-  const container = document.getElementById('mapArea');
-  const w = container.clientWidth - 280;
-  const h = container.clientHeight - 340;
-  const actualW = Math.max(600, w);
-  const actualH = Math.max(300, h);
+svgEl = d3.select('#globe').attr('viewBox',`0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet');
 
-  d3.select('#globe').attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet');
-  svgEl = d3.select('#globe');
-  svgEl.selectAll('*').remove();
+_proj = d3.geoNaturalEarth1().scale(152).translate([W/2, H/2+8]);
+_pathGen = d3.geoPath(_proj);
 
-  const proj = d3.geoNaturalEarth1().scale(155).translate([W/2, H/2+10]);
-  const pathGen = d3.geoPath(proj);
-
-  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(topo => {
-    world = topo;
-    drawMap(proj, pathGen);
-  }).catch(() => {
-    svgEl.append('text').attr('x',W/2).attr('y',H/2)
-      .attr('text-anchor','middle').attr('fill','#4a5568').attr('font-size','13')
-      .text('Map data unavailable — check network connection');
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+  .then(topo => { world=topo; drawMap(); renderDetail('salt'); })
+  .catch(() => {
+    svgEl.append('rect').attr('width',W).attr('height',H).attr('fill','#d5d1be');
+    svgEl.append('text').attr('x',W/2).attr('y',H/2).attr('text-anchor','middle')
+      .attr('fill','#6b6b8a').attr('font-size','14').text('Map topology unavailable — check network');
+    renderDetail('salt');
   });
-}
 
-function drawMap(proj, pathGen) {
+function drawMap(){
   if(!world) return;
   svgEl.selectAll('*').remove();
 
-  const countries = topojson.feature(world, world.objects.countries);
+  // Ocean background
+  svgEl.append('rect').attr('width',W).attr('height',H).attr('fill','#c8c5b0');
 
-  svgEl.append('rect').attr('width',W).attr('height',H).attr('fill','#060e1c');
-
-  // Grid lines (graticule)
-  const graticule = d3.geoGraticule();
-  svgEl.append('path').datum(graticule()).attr('d',pathGen)
-    .attr('fill','none').attr('stroke','rgba(255,255,255,0.04)').attr('stroke-width','0.5');
+  // Graticule (lat/lon grid lines)
+  const grat = d3.geoGraticule()();
+  svgEl.append('path').datum(grat).attr('d',_pathGen)
+    .attr('fill','none').attr('stroke','rgba(0,0,0,0.06)').attr('stroke-width','0.5');
 
   // Countries
+  const countries = topojson.feature(world, world.objects.countries);
   svgEl.append('g').selectAll('path').data(countries.features).join('path')
-    .attr('d',pathGen).attr('fill','#111d2e').attr('stroke','#1e3050').attr('stroke-width','0.5');
+    .attr('d',_pathGen)
+    .attr('fill','#a8a08a')
+    .attr('stroke','#8a826e')
+    .attr('stroke-width','0.7');
 
-  const tooltip = document.getElementById('tooltip');
-  const mapAreaEl = document.getElementById('mapArea');
+  // Country borders (internal)
+  svgEl.append('path')
+    .datum(topojson.mesh(world, world.objects.countries, (a,b)=>a!==b))
+    .attr('d',_pathGen)
+    .attr('fill','none')
+    .attr('stroke','#7a7260')
+    .attr('stroke-width','0.4');
+
+  const tip = document.getElementById('tip');
+  const mapEl = document.querySelector('.map-area');
+
+  const show = (ev, html) => {
+    tip.innerHTML=html; tip.classList.add('show');
+  };
+  const move = (ev) => {
+    const r=mapEl.getBoundingClientRect();
+    tip.style.left=(ev.clientX-r.left+14)+'px';
+    tip.style.top =(ev.clientY-r.top +14)+'px';
+  };
+  const hide = () => tip.classList.remove('show');
 
   Object.values(APTS).forEach(apt => {
     if(!vis[apt.id]) return;
 
-    const [ox,oy] = proj([apt.origin.lon, apt.origin.lat]);
+    const [ox,oy] = _proj([apt.origin.lon, apt.origin.lat]);
 
-    // Attack arcs
+    // Arcs
     apt.targets.forEach(t => {
-      const [tx,ty] = proj([t.lon, t.lat]);
-      const mx = (ox+tx)/2;
-      const my = Math.min(oy,ty) - 55;
-
+      const [tx,ty] = _proj([t.lon, t.lat]);
+      const mx=(ox+tx)/2, my=Math.min(oy,ty)-62;
       svgEl.append('path')
         .attr('d',`M${ox},${oy} Q${mx},${my} ${tx},${ty}`)
-        .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1.3')
-        .attr('opacity','0.5').attr('class','atk-arc')
-        .style('cursor','pointer')
-        .on('mouseenter', function(event) {
-          tooltip.innerHTML = `<strong style="color:${apt.color}">${apt.label}</strong><br>${t.label}`;
-          tooltip.classList.add('show');
-        })
-        .on('mousemove', function(event) {
-          const rect = mapAreaEl.getBoundingClientRect();
-          tooltip.style.left = (event.clientX - rect.left + 12)+'px';
-          tooltip.style.top  = (event.clientY - rect.top + 12)+'px';
-        })
-        .on('mouseleave', function() { tooltip.classList.remove('show'); })
+        .attr('fill','none').attr('stroke',apt.color)
+        .attr('stroke-width','1.6').attr('opacity','0.55')
+        .attr('class','atk-arc').style('cursor','pointer')
+        .on('mouseenter', ev => show(ev,`<strong style="color:${apt.acc}">${apt.label}</strong><br>${t.label}`))
+        .on('mousemove', move).on('mouseleave', hide)
         .on('click', () => selectAPT(apt.id, document.querySelector(`.apt-btn.${apt.id}`)));
     });
 
-    // Target nodes
+    // Target dots
     apt.targets.forEach(t => {
-      const [tx,ty] = proj([t.lon, t.lat]);
-      svgEl.append('circle').attr('cx',tx).attr('cy',ty).attr('r',4)
-        .attr('fill','#1e3050').attr('stroke',apt.color).attr('stroke-width','1.2');
-      svgEl.append('circle').attr('cx',tx).attr('cy',ty).attr('r',4)
-        .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1')
-        .attr('class','origin-pulse').attr('opacity','0.4')
-        .style('animation-delay', Math.random()*2+'s');
+      const [tx,ty] = _proj([t.lon, t.lat]);
+      svgEl.append('circle').attr('cx',tx).attr('cy',ty).attr('r',5)
+        .attr('fill','#eeecde').attr('stroke',apt.color).attr('stroke-width','1.8');
+      svgEl.append('circle').attr('cx',tx).attr('cy',ty).attr('r',5)
+        .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1.2')
+        .attr('class','origin-ring').style('animation-delay',Math.random()*2+'s');
     });
 
-    // Origin node
-    const grp = svgEl.append('g').style('cursor','pointer')
+    // Origin
+    const g = svgEl.append('g').style('cursor','pointer')
       .on('click', () => selectAPT(apt.id, document.querySelector(`.apt-btn.${apt.id}`)))
-      .on('mouseenter', function(event) {
-        tooltip.innerHTML = `<strong style="color:${apt.color}">${apt.label}</strong><br>Origin: ${apt.origin_label}<br>${apt.targets.length} active attack vectors`;
-        tooltip.classList.add('show');
-      })
-      .on('mousemove', function(event) {
-        const rect = mapAreaEl.getBoundingClientRect();
-        tooltip.style.left = (event.clientX - rect.left + 12)+'px';
-        tooltip.style.top  = (event.clientY - rect.top + 12)+'px';
-      })
-      .on('mouseleave', function() { tooltip.classList.remove('show'); });
+      .on('mouseenter', ev => show(ev,`<strong style="color:${apt.acc}">${apt.label}</strong><br>Origin: ${apt.origin_label}<br>${apt.targets.length} active vectors`))
+      .on('mousemove', move).on('mouseleave', hide);
 
-    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',12)
+    // glow ring
+    g.append('circle').attr('cx',ox).attr('cy',oy).attr('r',16)
       .attr('fill',apt.color).attr('opacity','0.12');
-    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',12)
-      .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1.2')
-      .attr('class','origin-pulse');
-    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',6)
-      .attr('fill',apt.color);
-    grp.append('circle').attr('cx',ox).attr('cy',oy).attr('r',3)
-      .attr('fill','#fff').attr('opacity','0.7');
+    // pulse ring
+    g.append('circle').attr('cx',ox).attr('cy',oy).attr('r',10)
+      .attr('fill','none').attr('stroke',apt.color).attr('stroke-width','1.4')
+      .attr('class','origin-ring');
+    // core
+    g.append('circle').attr('cx',ox).attr('cy',oy).attr('r',7).attr('fill',apt.color);
+    g.append('circle').attr('cx',ox).attr('cy',oy).attr('r',3).attr('fill','#eeecde').attr('opacity','0.9');
 
-    // Label
-    grp.append('text')
-      .attr('x',ox+13).attr('y',oy-4)
-      .attr('fill',apt.color)
-      .attr('font-size','10')
-      .attr('font-family','Share Tech Mono, monospace')
-      .attr('font-weight','600')
-      .text(apt.label);
-    grp.append('text')
-      .attr('x',ox+13).attr('y',oy+7)
-      .attr('fill','rgba(255,255,255,0.4)')
-      .attr('font-size','9')
-      .attr('font-family','Share Tech Mono, monospace')
-      .text(apt.origin_label);
+    // label
+    g.append('text').attr('x',ox+12).attr('y',oy-3)
+      .attr('fill',apt.color).attr('font-size','11').attr('font-weight','700')
+      .attr('font-family','Rajdhani,sans-serif').text(apt.label);
+    g.append('text').attr('x',ox+12).attr('y',oy+9)
+      .attr('fill',apt.color).attr('font-size','9').attr('opacity','0.7')
+      .attr('font-family','Share Tech Mono,monospace').text(apt.origin_label);
   });
 }
 
-let _proj, _pathGen;
-d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(topo => {
-  world = topo;
-  _proj = d3.geoNaturalEarth1().scale(155).translate([W/2, H/2+10]);
-  _pathGen = d3.geoPath(_proj);
-  d3.select('#globe').attr('viewBox',`0 0 ${W} ${H}`).attr('preserveAspectRatio','xMidYMid meet');
-  svgEl = d3.select('#globe');
-  drawMap(_proj, _pathGen);
-  renderDetail('salt');
-}).catch(() => {
-  d3.select('#globe').attr('viewBox',`0 0 900 460`);
-  svgEl = d3.select('#globe');
-  svgEl.append('rect').attr('width',900).attr('height',460).attr('fill','#060e1c');
-  svgEl.append('text').attr('x',450).attr('y',230).attr('text-anchor','middle').attr('fill','#4a5568').attr('font-size','14').text('Map data unavailable');
-  renderDetail('salt');
-});
-
-// === INTERACTIONS ===
-function toggleAPT(id) {
-  vis[id] = !vis[id];
-  const chips = document.querySelectorAll('.legend-chip');
-  chips.forEach(c => {
-    if(c.classList.contains(id)) {
-      if(vis[id]) c.classList.add('active'); else c.classList.remove('active');
+// ═══════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════
+function toggleAPT(id){
+  vis[id]=!vis[id];
+  document.querySelectorAll('.leg-chip').forEach(c=>{
+    if(c.classList.contains(id)){
+      vis[id]?c.classList.add('active'):c.classList.remove('active');
     }
   });
-  if(_proj && _pathGen) drawMap(_proj, _pathGen);
+  drawMap();
 }
 
-function selectAPT(id, btn) {
-  currentAPT = id;
-  document.querySelectorAll('.apt-btn').forEach(b => b.classList.remove('active'));
+function selectAPT(id, btn){
+  curAPT=id;
+  document.querySelectorAll('.apt-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  vis[id]=true;
+  document.querySelector(`.leg-chip.${id}`).classList.add('active');
+  drawMap();
   renderDetail(id);
-
-  // Highlight on map
-  vis[id] = true;
-  const chip = document.querySelector(`.legend-chip.${id}`);
-  if(chip) chip.classList.add('active');
-  if(_proj && _pathGen) drawMap(_proj, _pathGen);
 }
 
-function renderDetail(id) {
-  const apt = APTS[id];
-  document.getElementById('dpIcon').textContent = apt.icon;
-  document.getElementById('dpName').textContent = apt.label;
-  document.getElementById('dpName').className = 'dp-name '+apt.cls;
-  document.getElementById('dpMeta').textContent = apt.flag+' '+apt.nation+' · Active since '+apt.active+' · Origin: '+apt.origin_label;
-  document.getElementById('dpMitre').innerHTML = 'MITRE ATT&CK<span>'+apt.mitre+'</span>';
+function renderDetail(id){
+  const apt=APTS[id];
+  const panel=document.getElementById('detailPanel');
+  panel.classList.remove('hidden');
 
-  document.getElementById('dpTTPs').innerHTML = apt.ttps.map(t =>
-    `<div class="ttp-row">
-      <span class="ttp-num">${t.id}</span>
-      <div class="ttp-right">
+  document.getElementById('dpIcon').textContent=apt.icon;
+  document.getElementById('dpName').textContent=apt.label;
+  document.getElementById('dpName').className='dp-name '+apt.cls;
+  document.getElementById('dpMeta').textContent=
+    apt.flag+' '+apt.nation+' · Active since '+apt.active+' · Origin: '+apt.origin_label;
+  document.getElementById('dpMitre').innerHTML=
+    `MITRE ATT&CK<span>${apt.mitre}</span>`;
+
+  document.getElementById('dpTTPs').innerHTML=apt.ttps.map(t=>`
+    <div class="ttp-row">
+      <span class="ttp-id">${t.id}</span>
+      <div>
         <div class="ttp-tactic">${t.tactic}</div>
         <div class="ttp-tech">${t.tech}</div>
       </div>
-    </div>`
-  ).join('');
+    </div>`).join('');
 
-  document.getElementById('dpTools').innerHTML = apt.tools.map(t =>
-    `<span class="pill ${apt.cls}">${t}</span>`).join('');
+  document.getElementById('dpImpact').innerHTML=apt.impact.map(i=>`
+    <div class="impact-row">
+      <div class="impact-bullet" style="background:${apt.acc}"></div>
+      <span>${i}</span>
+    </div>`).join('');
 
-  document.getElementById('dpCVEs').innerHTML = apt.cves.map(c =>
-    `<span class="pill neutral">${c}</span>`).join('');
+  document.getElementById('dpTools').innerHTML=
+    apt.tools.map(t=>`<span class="pill ${apt.cls}">${t}</span>`).join('');
 
-  document.getElementById('dpVictims').innerHTML = apt.victims.map(v =>
-    `<span class="victim-pill">${v}</span>`).join('');
+  document.getElementById('dpCVEs').innerHTML=
+    apt.cves.map(c=>`<span class="pill neutral">${c}</span>`).join('');
 
-  document.getElementById('dpTargets').innerHTML = apt.targets.map(t =>
-    `<span class="pill ${apt.cls}">${t.label}</span>`).join('');
+  document.getElementById('dpVictims').innerHTML=
+    apt.victims.map(v=>`<span class="victim-pill">${v}</span>`).join('');
+
+  document.getElementById('dpTargets').innerHTML=
+    apt.targets.map(t=>`<span class="pill ${apt.cls}">${t.label}</span>`).join('');
 }
 </script>
 </body>
